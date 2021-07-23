@@ -2,14 +2,13 @@
 
 #include "Electra.h"
 #include "App.h"
-// #include "Message.h"
-// #include "Event.h"
 #include "AppWindows.h"
 #include "MidiBase.h"
-// #include "Device.h"
 
-// #include "KnobComponent.h"
+#include "TextComponent.h"
 #include "TextGraphics.h"
+
+class E1KontrolCallback;
 
 class ElectraApp : public App {
 public:
@@ -47,7 +46,10 @@ public:
 
 
 private:
+	friend class E1KontrolCallback;
+
 	PageWindow defaultWindow_;
+	TextComponent rack_, module_, page_;
 	AppWindows windows_;
 	MidiBase midi_;
 };
