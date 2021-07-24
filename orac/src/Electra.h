@@ -1,10 +1,10 @@
 #pragma once
 
 #include "AppSettings.h"
-#include <SdFat.h>
+#include "Colours.h"
 #include "context.h"
 #include "helpers.h"
-#include "Colours.h"
+#include <SdFat.h>
 
 class ElectraApp;
 

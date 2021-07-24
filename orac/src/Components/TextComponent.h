@@ -1,109 +1,36 @@
 #pragma once
 
-#include "Component.h"
+#include "OComponent.h"
 
-class TextComponent : public Component
-{
-	public:
+class TextComponent : public OComponent {
+public:
+  TextComponent() { *label = '\0'; }
 
-		TextComponent () :
-			isDisabled (false),
-			active (false),
-			backgroundColour (0x0000)
-		{
-			*label = '\0';
-		}
+  ~TextComponent() {}
 
-		~TextComponent ()
-		{
-		}
+  void setLabel(const char *newLabel) {
+    if (strlen(newLabel) == 0) {
+      *label = '\0';
+    } else {
+      copyString(label, newLabel, maxLabelLength);
+    }
+    repaint();
+  }
 
-		// Lambdas
-		std::function<bool (void)> onClick;
+  void paint(void) {
+    OComponent::paint();
+    // uint16_t w =    screen.getTextWidth(label, TextStyle::smallWhiteOnBlack);
 
-		void setLabel (const char *newLabel)
-		{
-			if (strlen (newLabel) == 0)
-			{
-				*label = '\0';
-			}
-			else
-			{
-				copyString (label, newLabel, maxLabelLength);
-			}
-			repaint();
-		}
+    screen.printText(screenX, screenY, label, TextStyle::smallWhiteOnBlack,
+                     width, TextAlign::center);
 
-		void setBackgroundColour (uint16_t newBackgroundColour)
-		{
-			backgroundColour = newBackgroundColour;
-		}
+    // if (active_) {
+    //   screen.drawLine(screenX + (width / 2) - (w / 2) - 1,
+    //                   screenY + 15, w, 0, 0xFFFF);
+    // }
+  }
 
-		void setDisabled (bool shouldBeDisabled)
-		{
-			isDisabled = shouldBeDisabled;
-		}
-
-		void setDimmed (bool shouldBeDimmed)
-		{
-		}
-
-		bool isDimmed (void) const
-		{
-			return (false);
-		}
-
-		void setActive (bool shouldBeActive)
-		{
-			active = shouldBeActive;
-		}
-
-		bool isActive (void) const
-		{
-			return (active);
-		}
-
-		void paintUpdate (void)
-		{
-			paint ();
-		}
-
-		void paint (void)
-		{
-			uint16_t labelWidth = screen.getTextWidth (label,
-				  TextStyle::smallWhiteOnBlack);
-
-			screen.fillRect (screenX, screenY, width - 1, height - 1, backgroundColour);
-			screen.printText (screenX, screenY, label, TextStyle::smallWhiteOnBlack,
-			    width, TextAlign::center);
-
-			if (active == true)
-			{
-				screen.drawLine (screenX + (width / 2) - (labelWidth / 2) - 1, screenY + 15,
-								 labelWidth, 0, 0xFFFF);
-			}
-		}
-
-		void onPotTouchDown (handle_t handle) override
-		{
-			if (onClick)
-			{
-				onClick ();
-			}
-		}
-
-		void onPotTouchUp (handle_t handle) override
-		{
-		}
-
-	private:
-		static const uint8_t maxLabelLength = 20;
-		char label[maxLabelLength + 1];
-		uint16_t backgroundColour;
-
-		struct
-		{
-			bool isDisabled : 1;
-			bool active : 1;
-		};
+private:
+  static const uint8_t maxLabelLength = 20;
+  char label[maxLabelLength + 1];
 };
