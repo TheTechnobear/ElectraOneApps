@@ -37,8 +37,8 @@ public:
 
       app_->page_.setLabel(p.displayName().c_str());
       for (unsigned i = 0; i < 3; i++) {
-        if (app_->pages_[i].page() == nullptr) {
-          app_->pages_[i].setPage(rack, module, page);
+        if (app_->pages_[i].pageId().size() == 0) {
+          app_->pages_[i].setPage(r.id(), m.id(), p.id());
           return;
         }
       }
@@ -54,7 +54,7 @@ public:
                const Kontrol::Parameter &p) override {
 
     if (src == Kontrol::CS_LOCAL) {
-      logMessage("E1KontrolCallback::changed");
+      // logMessage("E1KontrolCallback::changed");
 
       // if (!broadcastChange(src)) return;
       // if (!isActive()) return;
@@ -64,7 +64,7 @@ public:
       sysex.addHeader(E1_CHANGED_MSG);
       sysex.addUnsigned(stringToken(rack.id().c_str()));
       sysex.addUnsigned(stringToken(module.id().c_str()));
-      sysex.addUnsigned(stringToken(p.id().c_str()));
+      sysex.addString(p.id().c_str());
 
       auto v = p.current();
       switch (v.type()) {
@@ -322,7 +322,7 @@ unsigned ElectraApp::stringToken(const char *str) {
 #include "sysex.h"
 void ElectraApp::send(SysExOutputStream &sysex) {
 
-	sendSysData(sysex.buffer(), sysex.size(),USB_MIDI_PORT_CTRL);
+  sendSysData(sysex.buffer(), sysex.size(), USB_MIDI_PORT_CTRL);
 }
 
 void ElectraApp::handleElectraSysex(const SysexBlock &sysexBlock) {
@@ -379,7 +379,7 @@ bool ElectraApp::handleE1SysEx(Kontrol::ChangeSource src,
     std::string host = sysex.readString();
     unsigned port = sysex.readUnsigned();
 
-    // logMessage("E1_RACK_MSG %s %s %u", rackId.c_str(), host.c_str(),port);
+    // logMessage("E1_RACK_MSG %s %s %u", rackId.c_str(), host.c_str(), port);
     model->createRack(src, rackId, host, port);
     break;
   }
@@ -389,8 +389,8 @@ bool ElectraApp::handleE1SysEx(Kontrol::ChangeSource src,
     std::string displayName = sysex.readString();
     std::string type = sysex.readString();
 
-    // logMessage("E1_MODULE_MSG %s %s %s %s",
-    // rackId.c_str(),moduleId.c_str(),displayName.c_str(),type.c_str());
+    // logMessage("E1_MODULE_MSG %s %s %s %s", rackId.c_str(), moduleId.c_str(),
+    //            displayName.c_str(), type.c_str());
     model->createModule(src, rackId, moduleId, displayName, type);
     break;
   }
@@ -406,8 +406,8 @@ bool ElectraApp::handleE1SysEx(Kontrol::ChangeSource src,
       paramIds.push_back(val);
     }
 
-    // logMessage("E1_PAGE_MSG %s %s %s %s", rackId.c_str(),
-    // moduleId.c_str(),pageId.c_str(), displayName.c_str());
+    // logMessage("E1_PAGE_MSG %s %s %s %s", rackId.c_str(), moduleId.c_str(),
+    //            pageId.c_str(), displayName.c_str());
     model->createPage(src, rackId, moduleId, pageId, displayName, paramIds);
 
     break;

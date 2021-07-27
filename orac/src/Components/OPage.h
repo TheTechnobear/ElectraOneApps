@@ -7,7 +7,9 @@
 
 class OracPage : public OComponent {
 public:
-  OracPage(unsigned pn) : rack_(nullptr), module_(nullptr), page_(nullptr), pageN_(pn) {}
+  OracPage(unsigned pn) : pageN_(pn) {
+    model_ = Kontrol::KontrolModel::model();
+  }
 
   ~OracPage() {}
 
@@ -20,7 +22,7 @@ public:
 
       getParentWindow()->addAndMakeVisible(&paramCtrls_[i]);
 
-      unsigned enc =  ((i/2) * 6) +(i % 2) + (pageN_* 2) ;
+      unsigned enc = ((i / 2) * 6) + (i % 2) + (pageN_ * 2);
       paramCtrls_[i].setId(enc);
       getParentWindow()->assignPot(enc, 0, &paramCtrls_[i]);
     }
@@ -28,34 +30,42 @@ public:
 
   void click(unsigned i) { logMessage("clik param %d", i); }
 
-  void setPage( const std::shared_ptr<Kontrol::Rack> &r,
-  				const std::shared_ptr<Kontrol::Module> &m,
-               	const std::shared_ptr<Kontrol::Page> &p) {
-  	rack_ = r;
-    module_ = m;
-    page_ = p;
+  void setPage(const Kontrol::EntityId &r, const Kontrol::EntityId &m,
+               const Kontrol::EntityId &p) {
 
-    auto params = module_->getParams(p);
+    rackId_ = r;
+    moduleId_ = m;
+    pageId_ = p;
 
+    auto rack = model_->getRack(rackId_);
+    auto module = model_->getModule(rack, moduleId_);
+    auto page = model_->getPage(module, pageId_);
+
+    auto params = module->getParams(page);
     for (unsigned i = 0; i < MAX_PARAMS; i++) {
       if (i < params.size())
-        paramCtrls_[i].setParam(rack_,module_,params[i]);
+        paramCtrls_[i].setParam(rackId_, moduleId_, params[i]->id());
       else
-        paramCtrls_[i].setParam(rack_,module_,nullptr);
+        paramCtrls_[i].setParam(rackId_, moduleId_,"");
     }
+
     repaint();
   }
 
   void paint(void) {
     OComponent::paint();
 
+    auto rack = model_->getRack(rackId_);
+    auto module = model_->getModule(rack, moduleId_);
+    auto page = model_->getParam(module, pageId_);
+
     for (unsigned i = 0; i < MAX_PARAMS; i++) {
       paramCtrls_[i].paint();
     }
     screen.drawRect(screenX, screenY, width - 1, height - 1, fgClr_);
 
-    if (module_ && page_) {
-      auto &name = page_->displayName();
+    if (module && page) {
+      auto &name = page->displayName();
 
       screen.printText(screenX + 1, screenY + 1, name.c_str(),
                        TextStyle::smallWhiteOnBlack, width - 2,
@@ -83,14 +93,16 @@ public:
     paramCtrls_[3].setBounds(x + d + sp, y + d + sp, d, d);
   }
 
-  std::shared_ptr<Kontrol::Module> module() { return module_; }
-  std::shared_ptr<Kontrol::Page> page() { return page_; }
+  const Kontrol::EntityId &moduleId() { return moduleId_; }
+  const Kontrol::EntityId &pageId() { return pageId_; }
 
 private:
   static constexpr unsigned MAX_PARAMS = 4;
   OracParam paramCtrls_[MAX_PARAMS];
-  std::shared_ptr<Kontrol::Rack> rack_;
-  std::shared_ptr<Kontrol::Module> module_;
-  std::shared_ptr<Kontrol::Page> page_;
+  std::shared_ptr<Kontrol::KontrolModel> model_;
+  Kontrol::EntityId rackId_;
+  Kontrol::EntityId moduleId_;
+  Kontrol::EntityId pageId_;
+
   unsigned pageN_ = 0;
 };

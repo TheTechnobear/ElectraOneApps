@@ -5,22 +5,24 @@
 
 class OracParam : public OComponent {
 public:
-  OracParam() {}
+  OracParam() { model_ = Kontrol::KontrolModel::model(); }
 
   ~OracParam() {}
 
-  void setParam(
-			  	const std::shared_ptr<Kontrol::Rack> &r,
-  				const std::shared_ptr<Kontrol::Module> &m,
-                const std::shared_ptr<Kontrol::Parameter> &p) {
-  	rack_=r;
-  	module_=m;
-    param_ = p;
+  void setParam(const Kontrol::EntityId &r, const Kontrol::EntityId &m,
+                const Kontrol::EntityId &p) {
+    rackId_ = r;
+    moduleId_ = m;
+    paramId_ = p;
     repaint();
   }
 
   void paint(void) {
     OComponent::paint();
+
+    auto rack = model_->getRack(rackId_);
+    auto module = model_->getModule(rack, moduleId_);
+    auto param = model_->getParam(module, paramId_);
 
     uint16_t nameH = 12;
     int r = (height - 1 - nameH) / 2;
@@ -33,13 +35,13 @@ public:
 
     float value = 0.0f;
 
-    if (param_) {
-      auto &name = param_->displayName();
+    if (param) {
+      auto &name = param->displayName();
       int y = screenY + height - 2 - nameH;
       screen.printText(screenX + 1, y, name.c_str(),
                        TextStyle::smallWhiteOnBlack, width - 2,
                        TextAlign::center);
-      value = param_->asFloat(param_->current());
+      value = param->asFloat(param->current());
     }
 
     float ph = value + 0.25f;
@@ -51,19 +53,24 @@ public:
 
   void onPotChange(int16_t relativeChange, handle_t handle = 0) override {
     OComponent::onPotChange(relativeChange, handle);
-    if (rack_&& module_ && param_) {
-      auto model = Kontrol::KontrolModel::model();
-      float chg = float(relativeChange/256.0f);
+
+    auto rack = model_->getRack(rackId_);
+    auto module = model_->getModule(rack, moduleId_);
+    auto param = model_->getParam(module, paramId_);
+
+    if (rack && module && param) {
+      float chg = float(relativeChange / 256.0f);
       // logMessage("change %d %f",relativeChange, chg);
-      Kontrol::ParamValue calc = param_->calcRelative(chg);
-      model->changeParam(Kontrol::CS_LOCAL, rack_->id(), module_->id(),
-                         param_->id(), calc);
+      Kontrol::ParamValue calc = param->calcRelative(chg);
+      model_->changeParam(Kontrol::CS_LOCAL, rackId_, moduleId_, paramId_,
+                          calc);
       repaint();
     }
   }
 
 private:
-  std::shared_ptr<Kontrol::Rack> rack_=nullptr;
-  std::shared_ptr<Kontrol::Module> module_=nullptr;
-  std::shared_ptr<Kontrol::Parameter> param_=nullptr;
+  std::shared_ptr<Kontrol::KontrolModel> model_;
+  Kontrol::EntityId rackId_;
+  Kontrol::EntityId moduleId_;
+  Kontrol::EntityId paramId_;
 };
