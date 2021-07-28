@@ -2,7 +2,6 @@
 
 #include<sstream>
 
-
 static constexpr unsigned TB_SYSEX_MSG = 0x20;
 static constexpr uint8_t E1_Manufacturer[] = {0x00, 0x21, 0x45};
 
@@ -114,11 +113,11 @@ public:
     SysExInputStream &operator=(SysExInputStream &) = delete;
 
     bool isValid() {
-        return peek(0) == 0xF0 && peek(size_-1)==0xF7;
+        return peek(0) == 0xF0 && peek(size_ - 1) == 0xF7;
     }
 
     bool atEnd() {
-        return (pos_>=size_) || (peek(pos_)==0xF7);
+        return (pos_ >= size_) || (peek(pos_) == 0xF7);
     }
 
     bool readHeader() {
@@ -172,7 +171,7 @@ public:
         return v;
     }
 
-    unsigned pos() { return pos_;}
+    unsigned pos() { return pos_; }
 
 
 private:

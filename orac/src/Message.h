@@ -1,89 +1,89 @@
 #pragma once
 
-#include "ElectraMessage.h"
-#include "Event.h"
-#include "Macros.h"
-#include "SignMode.h"
-#include "helpers.h"
+#include <ElectraMessage.h>
+#include <Event.h>
+#include <Macros.h>
+#include <SignMode.h>
+#include <helpers.h>
 #include <stdint.h>
 #include <vector>
 
 class Message {
 public:
-  Message()
-      : deviceId(0), parameterNumber(0), midiMin(0), midiMax(NOT_SET),
-        value(NOT_SET), offValue(0), onValue(NOT_SET), event(0) {
-    type = (uint8_t)ElectraMessageType::invalid;
-    lsbFirst = false;
-    signMode = (uint8_t)SignMode::noSign;
-    bitWidth = 7;
-  }
-
-  Message(uint8_t newDeviceId, ElectraMessageType newType,
-          uint16_t newParameterNumber, int16_t newMidiMin, int16_t newMidiMax,
-          int16_t newValue, int16_t newOffValue, int16_t newOnValue,
-          std::vector<uint8_t> newData, bool newLsbFirst, SignMode newSignMode,
-          uint8_t newbitWidth)
-      : deviceId(newDeviceId), parameterNumber(newParameterNumber),
-        midiMin(newMidiMin), midiMax(newMidiMax), value(newValue),
-        offValue(newOffValue), onValue(newOnValue), data(newData), event(0) {
-    type = (uint8_t)newType;
-    lsbFirst = newLsbFirst;
-    signMode = (uint8_t)newSignMode;
-    bitWidth = newbitWidth;
-
-    if (newType == ElectraMessageType::note) {
-      offValue = 0;
-      onValue = 127; // 0 for note off and 127 for note on.
+    Message()
+        : deviceId(0), parameterNumber(0), midiMin(0), midiMax(NOT_SET),
+          value(NOT_SET), offValue(0), onValue(NOT_SET), event(0) {
+        type = (uint8_t) ElectraMessageType::invalid;
+        lsbFirst = false;
+        signMode = (uint8_t) SignMode::noSign;
+        bitWidth = 7;
     }
-  }
 
-  void setValue(int16_t newValue) { value = newValue; }
+    Message(uint8_t newDeviceId, ElectraMessageType newType,
+            uint16_t newParameterNumber, int16_t newMidiMin, int16_t newMidiMax,
+            int16_t newValue, int16_t newOffValue, int16_t newOnValue,
+            std::vector<uint8_t> newData, bool newLsbFirst, SignMode newSignMode,
+            uint8_t newbitWidth)
+        : deviceId(newDeviceId), parameterNumber(newParameterNumber),
+          midiMin(newMidiMin), midiMax(newMidiMax), value(newValue),
+          offValue(newOffValue), onValue(newOnValue), data(newData), event(0) {
+        type = (uint8_t) newType;
+        lsbFirst = newLsbFirst;
+        signMode = (uint8_t) newSignMode;
+        bitWidth = newbitWidth;
 
-  int16_t getValue(void) { return (value); }
+        if (newType == ElectraMessageType::note) {
+            offValue = 0;
+            onValue = 127; // 0 for note off and 127 for note on.
+        }
+    }
 
-  int16_t getMidiMin(void) { return (midiMin); }
+    void setValue(int16_t newValue) { value = newValue; }
 
-  int16_t getMidiMax(void) { return (midiMax); }
+    int16_t getValue(void) { return (value); }
 
-  SignMode getSignMode(void) { return ((SignMode)signMode); }
+    int16_t getMidiMin(void) { return (midiMin); }
 
-  Event getEvent(void) { return ((Event)event); }
+    int16_t getMidiMax(void) { return (midiMax); }
 
-  void setEvent(Event newEvent) { event = (uint8_t)newEvent; }
+    SignMode getSignMode(void) { return ((SignMode) signMode); }
 
-  ElectraMessageType getType(void) { return ((ElectraMessageType)type); }
+    Event getEvent(void) { return ((Event) event); }
 
-  void setDeviceId(uint8_t newDeviceId) { deviceId = newDeviceId; }
+    void setEvent(Event newEvent) { event = (uint8_t) newEvent; }
 
-  uint8_t getDeviceId(void) { return (deviceId); }
+    ElectraMessageType getType(void) { return ((ElectraMessageType) type); }
 
-  uint16_t getParameterNumber(void) { return (parameterNumber); }
+    void setDeviceId(uint8_t newDeviceId) { deviceId = newDeviceId; }
 
-  int16_t getOffValue(void) { return (offValue); }
+    uint8_t getDeviceId(void) { return (deviceId); }
 
-  int16_t getOnValue(void) { return (onValue); }
+    uint16_t getParameterNumber(void) { return (parameterNumber); }
 
-  bool getLsbFirst(void) { return (lsbFirst); }
+    int16_t getOffValue(void) { return (offValue); }
 
-  uint8_t getbitWidth(void) { return (bitWidth); }
+    int16_t getOnValue(void) { return (onValue); }
 
-  std::vector<uint8_t> data;
+    bool getLsbFirst(void) { return (lsbFirst); }
+
+    uint8_t getbitWidth(void) { return (bitWidth); }
+
+    std::vector<uint8_t> data;
 
 private:
-  uint8_t deviceId;
-  uint16_t parameterNumber;
-  int16_t midiMin;
-  int16_t midiMax;
-  int16_t value;
-  int16_t offValue;
-  int16_t onValue;
+    uint8_t deviceId;
+    uint16_t parameterNumber;
+    int16_t midiMin;
+    int16_t midiMax;
+    int16_t value;
+    int16_t offValue;
+    int16_t onValue;
 
-  struct {
-    uint8_t type : 4;
-    bool lsbFirst : 1;
-    uint8_t signMode : 2;
-    uint8_t bitWidth : 4;
-    uint8_t event : 2;
-  };
+    struct {
+        uint8_t type: 4;
+        bool lsbFirst: 1;
+        uint8_t signMode: 2;
+        uint8_t bitWidth: 4;
+        uint8_t event: 2;
+    };
 };
