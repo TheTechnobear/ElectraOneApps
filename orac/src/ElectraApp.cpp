@@ -5,7 +5,6 @@
 
 ElectraApp electraApp;
 
-ElectraApp::ElectraApp() { windows_.setCurrentWindow(&defaultWindow_); }
 
 class E1KontrolCallback : public Kontrol::KontrolCallback {
 public:
@@ -15,26 +14,36 @@ public:
 
     ~E1KontrolCallback() {}
 
-    void rack(Kontrol::ChangeSource, const Kontrol::Rack &r) override {
+    void rack(Kontrol::ChangeSource src,
+              const Kontrol::Rack &r) override {
+        if (src == Kontrol::CS_LOCAL) {
+        } else {
+            app_->mainWindow().addRack(r);
+        }
     }
 
-    void module(Kontrol::ChangeSource, const Kontrol::Rack &r,
+    void module(Kontrol::ChangeSource src,
+                const Kontrol::Rack &r,
                 const Kontrol::Module &m) override {
+        if (src == Kontrol::CS_LOCAL) {
+        } else {
+            auto rack = app_->mainWindow().getRack(r.id());
+            if (rack) {
+                rack->addModule(r, m);
+            }
+        }
+
     }
 
     void page(Kontrol::ChangeSource src, const Kontrol::Rack &r,
               const Kontrol::Module &m, const Kontrol::Page &p) override {
         if (src == Kontrol::CS_LOCAL) {
         } else {
-            auto model = Kontrol::KontrolModel::model();
-            auto rack = model->getRack(r.id());
-            auto module = model->getModule(rack, m.id());
-            auto page = model->getPage(module, p.id());
-
-            for (auto &uipage : app_->pages_) {
-                if (uipage.pageId().size() == 0) {
-                    uipage.setPage(r.id(), m.id(), p.id());
-                    return;
+            auto rack = app_->mainWindow().getRack(r.id());
+            if (rack) {
+                auto module = rack->getModule(m.id());
+                if (module) {
+                    module->addPage(r, m, p);
                 }
             }
         }
@@ -79,9 +88,13 @@ public:
             send(sysex);
 
         } else {
-            for (auto &uipage : app_->pages_) {
-                if (uipage.moduleId() == module.id()) {
-                    uipage.repaint();
+            auto rackpage = app_->mainWindow().getRack(rack.id());
+            if (rackpage) {
+                auto modulepage = rackpage->getModule(module.id());
+                if (modulepage) {
+                    // TODO
+                    // need to look for param page, and only repaint that
+                    modulepage->repaint();
                 }
             }
         }
@@ -132,13 +145,11 @@ private:
     ElectraApp *app_;
 };
 
-// static int16_t rgbToRgb565(uint8_t r, uint8_t g, uint8_t b) {
-//   uint16_t rgb565 = 0;
-//   rgb565 += uint16_t(r & 0b011111) << 11;
-//   rgb565 += uint16_t(g & 0b011111) << 5;
-//   rgb565 += (b & 0b011111);
-//   return rgb565;
-// }
+
+ElectraApp::ElectraApp() {
+    windows_.setCurrentWindow(&mainWindow_);
+}
+
 
 void ElectraApp::setup(void) {
     auto cb = std::make_shared<E1KontrolCallback>(this);
@@ -160,30 +171,6 @@ void ElectraApp::setup(void) {
                                          TextStyle::largeWhiteOnBlack,
                                          TextAlign::center));
 
-    unsigned sp = 20;
-    unsigned xpos = sp;
-    unsigned bsz = 240;
-
-    uint16_t clrs_[3] = {ElectraColours::getNumericRgb565(ElectraColours::red),
-                         ElectraColours::getNumericRgb565(ElectraColours::orange),
-                         ElectraColours::getNumericRgb565(ElectraColours::blue)};
-    // uint16_t clrs_[3] = {rgbToRgb565(0xF, 0x0, 0x0), gbToRgb565(0x0, 0xF, 0x0),
-    //                      rgbToRgb565(0x0, 0x0, 0xF)};
-
-    unsigned i = 0;
-    for (auto &uipage : pages_) {
-        uipage.setfgColour(clrs_[i]);
-        uipage.setBounds(xpos, 60, bsz, bsz);
-        window->addAndMakeVisible(&uipage);
-        xpos += bsz + sp;
-        i++;
-    }
-
-    // pages_[0].onClick = [this]() {
-    //   logMessage("page 0 touch");
-    //   return true;
-    // };
-
     window->repaint();
 
     logMessage("setup completed");
@@ -191,6 +178,7 @@ void ElectraApp::setup(void) {
 
 
 void ElectraApp::buttonDown(uint8_t buttonId) {
+    logMessage(" ElectraApp::buttonDown %d", buttonId);
 }
 
 void ElectraApp::potMove(uint8_t potId, int16_t relativeChange) {}

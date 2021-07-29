@@ -6,20 +6,19 @@
 
 class OracParam : public OComponent {
 public:
-    OracParam(OComponent *parent = nullptr) :
-        OComponent(parent) {
+    OracParam(
+        const Kontrol::Rack &r,
+        const Kontrol::Module &m,
+        const Kontrol::Parameter &p,
+        OComponent *parent) :
+        OComponent(parent),
+        rackId_(r.id()),
+        moduleId_(m.id()),
+        paramId_(p.id()) {
         model_ = Kontrol::KontrolModel::model();
     }
 
     ~OracParam() {}
-
-    void setParam(const Kontrol::EntityId &r, const Kontrol::EntityId &m,
-                  const Kontrol::EntityId &p) {
-        rackId_ = r;
-        moduleId_ = m;
-        paramId_ = p;
-        repaint();
-    }
 
     void paint(void) {
         clearBackground();

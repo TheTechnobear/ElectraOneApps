@@ -4,9 +4,13 @@
 
 class TextComponent : public OComponent {
 public:
-    TextComponent() { *label = '\0'; }
+    explicit TextComponent() {
+        *label = '\0';
+    }
 
-    ~TextComponent() {}
+    ~TextComponent() {
+
+    }
 
     void setLabel(const char *newLabel) {
         if (strlen(newLabel) == 0) {

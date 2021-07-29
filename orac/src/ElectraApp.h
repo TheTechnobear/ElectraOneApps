@@ -6,11 +6,12 @@
 
 #include <KontrolModel.h>
 
-#include "Components/OPage.h"
+
 #include "Components/TextComponent.h"
 #include "Windows/AppWindows.h"
-#include "Electra.h"
+#include "Windows/MainWindow.h"
 
+#include "Electra.h"
 #include "SysExStream.h"
 
 
@@ -19,7 +20,7 @@ class E1KontrolCallback;
 
 class ElectraApp : public App {
 public:
-    ElectraApp();
+    explicit ElectraApp();
 
     // App
     void setup(void) override;
@@ -50,6 +51,8 @@ public:
 
     Window *currentWindow() { return windows_.getCurrentWindow(); }
 
+    MainWindow &mainWindow() { return mainWindow_; }
+
 private:
     friend class E1KontrolCallback;
 
@@ -66,8 +69,8 @@ private:
 
     friend class E1KontrolCallback;
 
-    PageWindow defaultWindow_;
-    std::vector<OracPage> pages_ = {0, 1, 2};
+
+    MainWindow mainWindow_;
     AppWindows windows_;
     MidiBase midi_;
 };

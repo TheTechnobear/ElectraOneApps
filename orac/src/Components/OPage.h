@@ -1,67 +1,70 @@
 #pragma once
 
-#include "OComponent.h"
 #include "OParam.h"
 
 #include <KontrolModel.h>
 
 class OracPage : public OComponent {
 public:
-    OracPage(unsigned pn) : pageN_(pn) {
+    OracPage(const Kontrol::Rack &r,
+             const Kontrol::Module &m,
+             const Kontrol::Page &p,
+             OComponent *parent) :
+        OComponent(parent),
+        rackId_(r.id()),
+        moduleId_(m.id()),
+        pageId_(p.id()) {
         model_ = Kontrol::KontrolModel::model();
-
-        for (unsigned i = 0; i < MAX_PARAMS; i++) {
-            auto ctrl = std::make_shared<OracParam>(this);
-            unsigned enc = ((i / 2) * 6) + (i % 2) + (pageN_ * 2);
-            ctrl->setId(enc);
-            ctrl->onClick = [this, i](void) {
-                click(i);
-                return true;
-            };
-
-            paramCtrls_.push_back(ctrl);
-            add(ctrl);
-        }
     }
+
 
     ~OracPage() {}
 
-    void assignToWindow(Window *window) override {
-        OComponent::assignToWindow(window);
-//        unsigned i = 0;
-        for (auto &uiparam : paramCtrls_) {
-//            i++;
-            unsigned enc = uiparam->getId();
-            getParentWindow()->assignPot(enc, 0, uiparam.get());
-        }
-    }
-
-
     void click(unsigned i) { logMessage("clik param %d", i); }
 
-    void setPage(const Kontrol::EntityId &r, const Kontrol::EntityId &m,
-                 const Kontrol::EntityId &p) {
-
-        rackId_ = r;
-        moduleId_ = m;
-        pageId_ = p;
-
+    void initParams() {
         auto rack = model_->getRack(rackId_);
         auto module = model_->getModule(rack, moduleId_);
         auto page = model_->getPage(module, pageId_);
 
         auto params = module->getParams(page);
-        unsigned i = 0;
-        for (auto &uiparam : paramCtrls_) {
-            if (i < params.size())
-                uiparam->setParam(rackId_, moduleId_, params[i]->id());
-            else
-                uiparam->setParam(rackId_, moduleId_, "");
-            i++;
+
+        int pos = 0;
+        for (auto param : params) {
+            auto ctrl = std::make_shared<OracParam>(*rack, *module, *param, this);
+
+            params_.push_back(ctrl);
+
+            unsigned pageN = getId();
+            unsigned enc = ((pos / 2) * 6) + (pos % 2) + (pageN * 2);
+            ctrl->setId(enc);
+            ctrl->onClick = [this, pos](void) {
+                click(pos);
+                return true;
+            };
+
+
+            unsigned h = (height - 9) / 2;
+            unsigned w = (width - 9) / 2;
+            unsigned x = screenX + 3 + ((pos % 2) * (w + 3));
+            unsigned y = screenY + 3 + ((pos / 2) * (h + 3));
+
+            ctrl->setBounds(x, y, w, h);
+            ctrl->setVisible(isVisible());
+//            ctrl->setDimmed(pos != 0);
+//            ctrl->setActive(parent_->isActive());
+
+            getParentWindow()->addComponent(ctrl.get());
+            add(ctrl);
+            ctrl->assignToWindow(getParentWindow());
+            if (enc < 12) getParentWindow()->assignPot(enc, 0, ctrl.get());
+
+            if (ctrl->isVisible()) {
+                ctrl->repaint();
+            }
+
+            pos++;
         }
-
-
-        repaint();
     }
 
     void paint(void) {
@@ -71,11 +74,11 @@ public:
 
         auto rack = model_->getRack(rackId_);
         auto module = model_->getModule(rack, moduleId_);
-        auto page = model_->getParam(module, pageId_);
+        auto page = model_->getPage(module, pageId_);
 
-        screen.drawRect(screenX, screenY, width - 1, height - 1, fgClr_);
+        drawBorder();
 
-        if (module && page) {
+        if (page) {
             auto &name = page->displayName();
 
             screen.printText(screenX + 1, screenY + 1, name.c_str(),
@@ -88,32 +91,15 @@ public:
         }
     }
 
-    void resized() override {
-//        OComponent::resized();
-
-        int sp = 20;
-        int nameH = 0;
-        int d = (height - nameH - (sp * 3)) / 2;
-        int x = screenX + sp;
-        int y = screenY + sp;
-
-        paramCtrls_[0]->setBounds(x, y, d, d);
-        paramCtrls_[1]->setBounds(x + d + sp, y, d, d);
-        paramCtrls_[2]->setBounds(x, y + d + sp, d, d);
-        paramCtrls_[3]->setBounds(x + d + sp, y + d + sp, d, d);
-    }
-
-    const Kontrol::EntityId &moduleId() { return moduleId_; }
-
-    const Kontrol::EntityId &pageId() { return pageId_; }
-
 private:
-    static constexpr unsigned MAX_PARAMS = 4;
-    std::vector<std::shared_ptr<OracParam>> paramCtrls_;
-    std::shared_ptr<Kontrol::KontrolModel> model_;
     Kontrol::EntityId rackId_;
     Kontrol::EntityId moduleId_;
     Kontrol::EntityId pageId_;
 
-    unsigned pageN_ = 0;
+    std::shared_ptr<Kontrol::KontrolModel> model_;
+
+//    static constexpr unsigned MAX_PARAMS = 4;
+    std::vector<std::shared_ptr<OracParam>> params_;
+
+//    unsigned pageN_ = 0;
 };

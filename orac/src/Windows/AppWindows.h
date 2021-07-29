@@ -5,7 +5,7 @@
 
 class AppWindows : public Windows {
 public:
-    AppWindows() : currentWindow_(nullptr) {}
+    explicit AppWindows() : currentWindow_(nullptr) {}
 
     void setCurrentWindow(Window *newCurrentWindow) {
         currentWindow_ = newCurrentWindow;

@@ -3,13 +3,21 @@
 #include <Component.h>
 #include <Colours.h>
 
+// static int16_t rgbToRgb565(uint8_t r, uint8_t g, uint8_t b) {
+//   uint16_t rgb565 = 0;
+//   rgb565 += uint16_t(r & 0b011111) << 11;
+//   rgb565 += uint16_t(g & 0b011111) << 5;
+//   rgb565 += (b & 0b011111);
+//   return rgb565;
+// }
+
+
 // text height s=12, m = 16, L =18
 class OComponent : public Component {
 public:
-    OComponent(OComponent *parent = nullptr) :
+    explicit OComponent(OComponent *parent = nullptr) :
         active_(false),
         dimmed_(false) {
-
     }
 
     ~OComponent() {
@@ -78,7 +86,11 @@ public:
         screen.fillRect(screenX, screenY, width - 1, height - 1, bgClr_);
     }
 
-    void setfgColour(uint16_t clr) { fgClr_ = clr; }
+    void drawBorder() {
+        screen.drawRect(screenX, screenY, width - 1, height - 1, fgClr_);
+    }
+
+    void setFgColour(uint16_t clr) { fgClr_ = clr; }
 
     void setBgColour(uint16_t clr) { bgClr_ = clr; }
 

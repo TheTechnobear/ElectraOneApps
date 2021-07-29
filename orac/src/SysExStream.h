@@ -21,8 +21,10 @@ enum SysExMsgs {
 
 class SysExOutputStream {
 public:
-    SysExOutputStream(unsigned max_sz) : size_(0), buf_(new unsigned char[max_sz]), max_sz_(max_sz) {
-        ;
+    explicit SysExOutputStream(unsigned max_sz) :
+        size_(0),
+        buf_(new unsigned char[max_sz]),
+        max_sz_(max_sz) {
     }
 
     ~SysExOutputStream() {
@@ -30,8 +32,8 @@ public:
         buf_ = nullptr;
     }
 
-//    SysExOutputStream(SysExOutputStream &) = delete;
-//    SysExOutputStream &operator=(SysExOutputStream &) = delete;
+    SysExOutputStream(SysExOutputStream &) = delete;
+    SysExOutputStream &operator=(SysExOutputStream &) = delete;
 
     SysExOutputStream &operator<<(unsigned b) {
         if (size_ < max_sz_ - 1) {
@@ -107,7 +109,11 @@ private:
 
 class SysExInputStream {
 public:
-    SysExInputStream(const SysexBlock &sysexBlock) : sysexBlock_(sysexBlock), pos_(0), size_(sysexBlock.getLength()) { ; }
+    explicit SysExInputStream(const SysexBlock &sysexBlock) :
+        sysexBlock_(sysexBlock),
+        pos_(0),
+        size_(sysexBlock.getLength()) {
+    }
 
     SysExInputStream(SysExOutputStream &) = delete;
     SysExInputStream &operator=(SysExInputStream &) = delete;
