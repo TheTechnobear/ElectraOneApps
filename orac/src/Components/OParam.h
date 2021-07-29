@@ -6,7 +6,10 @@
 
 class OracParam : public OComponent {
 public:
-    OracParam() { model_ = Kontrol::KontrolModel::model(); }
+    OracParam(OComponent *parent = nullptr) :
+        OComponent(parent) {
+        model_ = Kontrol::KontrolModel::model();
+    }
 
     ~OracParam() {}
 
@@ -19,6 +22,7 @@ public:
     }
 
     void paint(void) {
+        clearBackground();
         OComponent::paint();
 
         auto rack = model_->getRack(rackId_);
@@ -45,7 +49,9 @@ public:
             value = param->asFloat(param->current());
         }
 
-        float ph = value + 0.25f;
+//        float ph = value + 0.25f;
+        float ph = (value * 0.9f) + 0.05f + 0.25f;
+
 
         int xe = (cosf(ph * 2 * PI) * float(r));
         int ye = (sinf(ph * 2 * PI) * float(r));

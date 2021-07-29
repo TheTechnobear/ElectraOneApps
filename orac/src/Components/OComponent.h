@@ -6,19 +6,16 @@
 // text height s=12, m = 16, L =18
 class OComponent : public Component {
 public:
-    OComponent()
-        : disable_(false), active_(false), dimmed_(false), bgClr_(0x0000),
-          fgClr_(0xffff) {}
+    OComponent(OComponent *parent = nullptr) :
+        active_(false),
+        dimmed_(false) {
 
-    ~OComponent() {}
+    }
+
+    ~OComponent() {
+    }
 
     std::function<bool(void)> onClick;
-
-    void setfgColour(uint16_t clr) { fgClr_ = clr; }
-
-    void setBgColour(uint16_t clr) { bgClr_ = clr; }
-
-    void setDisabled(bool d) { disable_ = d; }
 
     // Component
     void setDimmed(bool d) override { dimmed_ = d; }
@@ -43,19 +40,57 @@ public:
         }
     }
 
+
+    void assignToWindow(Window *window) {
+        Component::assignToWindow(window);
+        for (auto &c : children_) {
+            c->assignToWindow(window);
+        }
+    }
+
+
     // Graphics
     void paintUpdate(void) override { paint(); }
 
     void paint(void) override {
+        for (auto &c : children_) {
+            c->paint();
+        }
+    }
+
+    void visibilityChanged() override {
+        bool v = isVisible();
+        for (auto &c : children_) {
+            c->setVisible(v);
+        }
+    }
+
+    void resized() override {
+        for (auto &c : children_) {
+            c->resized();
+        }
+    }
+
+    // -------------------
+    void add(std::shared_ptr<OComponent> c) { children_.push_back(c); }
+
+    void clearBackground() {
         screen.fillRect(screenX, screenY, width - 1, height - 1, bgClr_);
     }
 
+    void setfgColour(uint16_t clr) { fgClr_ = clr; }
+
+    void setBgColour(uint16_t clr) { bgClr_ = clr; }
+
 protected:
-    uint16_t bgClr_;
-    uint16_t fgClr_;
+    uint16_t bgClr_ = 0x0000;
+    uint16_t fgClr_ = 0xffff;
     struct {
-        bool disable_: 1;
         bool active_: 1;
         bool dimmed_: 1;
     };
+
+    std::shared_ptr<OComponent> parent_;
+    std::vector<std::shared_ptr<OComponent>> children_;
+
 };

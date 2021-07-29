@@ -30,8 +30,8 @@ public:
         buf_ = nullptr;
     }
 
-    SysExOutputStream(SysExOutputStream &) = delete;
-    SysExOutputStream &operator=(SysExOutputStream &) = delete;
+//    SysExOutputStream(SysExOutputStream &) = delete;
+//    SysExOutputStream &operator=(SysExOutputStream &) = delete;
 
     SysExOutputStream &operator<<(unsigned b) {
         if (size_ < max_sz_ - 1) {

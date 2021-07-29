@@ -40,9 +40,7 @@ public:
     void handleIncomingControlMessage(MidiInput &midiInput,
                                       MidiMessage &midiMessage) override;
     void handleElectraSysex(const SysexBlock &sysexBlock) override;
-    bool handleCtrlFileReceived(LocalFile, ElectraCommand::Object) override;
     void runUserTask(void) override;
-    void execute(const char *filename) override;
 
     Windows *getWindows(void) override { return (&windows_); }
 
@@ -69,9 +67,7 @@ private:
     friend class E1KontrolCallback;
 
     PageWindow defaultWindow_;
-    TextComponent rack_, module_, page_;
-
-    OracPage pages_[3] = {0, 1, 2};
+    std::vector<OracPage> pages_ = {0, 1, 2};
     AppWindows windows_;
     MidiBase midi_;
 };

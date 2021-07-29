@@ -1,7 +1,5 @@
 #include "ElectraApp.h"
 
-#include <sstream>
-#include <string>
 #include <vector>
 #include <memory>
 
@@ -11,35 +9,31 @@ ElectraApp::ElectraApp() { windows_.setCurrentWindow(&defaultWindow_); }
 
 class E1KontrolCallback : public Kontrol::KontrolCallback {
 public:
-    E1KontrolCallback(ElectraApp *app)
-        : app_(app), sysExOutStream_(OUTPUT_MAX_SZ) {
-        ;
+    E1KontrolCallback(ElectraApp *a)
+        : app_(a), sysExOutStream_(OUTPUT_MAX_SZ) {
     }
 
-    ~E1KontrolCallback() { ; }
+    ~E1KontrolCallback() {}
 
     void rack(Kontrol::ChangeSource, const Kontrol::Rack &r) override {
-        app_->rack_.setLabel(r.host().c_str());
     }
 
     void module(Kontrol::ChangeSource, const Kontrol::Rack &r,
                 const Kontrol::Module &m) override {
-        app_->module_.setLabel(m.type().c_str());
     }
 
     void page(Kontrol::ChangeSource src, const Kontrol::Rack &r,
               const Kontrol::Module &m, const Kontrol::Page &p) override {
-        if (src == Kontrol::CS_LOCAL) { ;
+        if (src == Kontrol::CS_LOCAL) {
         } else {
             auto model = Kontrol::KontrolModel::model();
             auto rack = model->getRack(r.id());
             auto module = model->getModule(rack, m.id());
             auto page = model->getPage(module, p.id());
 
-            app_->page_.setLabel(p.displayName().c_str());
-            for (unsigned i = 0; i < 3; i++) {
-                if (app_->pages_[i].pageId().size() == 0) {
-                    app_->pages_[i].setPage(r.id(), m.id(), p.id());
+            for (auto &uipage : app_->pages_) {
+                if (uipage.pageId().size() == 0) {
+                    uipage.setPage(r.id(), m.id(), p.id());
                     return;
                 }
             }
@@ -48,7 +42,6 @@ public:
 
     void param(Kontrol::ChangeSource, const Kontrol::Rack &,
                const Kontrol::Module &, const Kontrol::Parameter &) override {
-        ;
     }
 
     void changed(Kontrol::ChangeSource src, const Kontrol::Rack &rack,
@@ -86,9 +79,9 @@ public:
             send(sysex);
 
         } else {
-            for (unsigned i = 0; i < 3; i++) {
-                if (app_->pages_[i].moduleId() == module.id()) {
-                    app_->pages_[i].repaint();
+            for (auto &uipage : app_->pages_) {
+                if (uipage.moduleId() == module.id()) {
+                    uipage.repaint();
                 }
             }
         }
@@ -96,10 +89,9 @@ public:
 
     void resource(Kontrol::ChangeSource, const Kontrol::Rack &,
                   const std::string &, const std::string &) override {
-        ;
     }
 
-    void deleteRack(Kontrol::ChangeSource, const Kontrol::Rack &) override { ; }
+    void deleteRack(Kontrol::ChangeSource, const Kontrol::Rack &) override {}
 
     // void activeModule(ChangeSource, const Rack &, const Module &) { ; }
     // void loadModule(ChangeSource, const Rack &, const EntityId &, const
@@ -116,9 +108,9 @@ public:
     // Parameter &, unsigned bus) { ; } void unassignModulation(ChangeSource,
     // const Rack &, const Module &, const Parameter &, unsigned bus) { ; }
 
-    void publishStart(Kontrol::ChangeSource, unsigned numRacks) {}
+    void publishStart(Kontrol::ChangeSource, unsigned numRacks) override {}
 
-    void publishRackFinished(Kontrol::ChangeSource, const Kontrol::Rack &) {}
+    void publishRackFinished(Kontrol::ChangeSource, const Kontrol::Rack &) override {}
 
     // void savePreset(ChangeSource, const Rack &, std::string preset) { ; }
 
@@ -178,12 +170,13 @@ void ElectraApp::setup(void) {
     // uint16_t clrs_[3] = {rgbToRgb565(0xF, 0x0, 0x0), gbToRgb565(0x0, 0xF, 0x0),
     //                      rgbToRgb565(0x0, 0x0, 0xF)};
 
-    for (unsigned i = 0; i < 3; i++) {
-        pages_[i].setBounds(xpos, 60, bsz, bsz);
-        pages_[i].setfgColour(clrs_[i]);
+    unsigned i = 0;
+    for (auto &uipage : pages_) {
+        uipage.setfgColour(clrs_[i]);
+        uipage.setBounds(xpos, 60, bsz, bsz);
+        window->addAndMakeVisible(&uipage);
         xpos += bsz + sp;
-        window->addAndMakeVisible(&pages_[i]);
-        pages_[i].init();
+        i++;
     }
 
     // pages_[0].onClick = [this]() {
@@ -191,36 +184,13 @@ void ElectraApp::setup(void) {
     //   return true;
     // };
 
-    // labels
-    ypos = 400;
-    xpos = 700;
-    rack_.setBounds(xpos, ypos, 300, 30);
-    rack_.setLabel("Rack");
-    window->addAndMakeVisible(&rack_);
-
-    ypos += 30;
-    module_.setBounds(xpos, ypos, 300, 30);
-    module_.setLabel("Module");
-    window->addAndMakeVisible(&module_);
-
-    ypos += 30;
-    page_.setBounds(xpos, ypos, 300, 30);
-    page_.setLabel("Page");
-    window->addAndMakeVisible(&page_);
-
     window->repaint();
 
     logMessage("setup completed");
 }
 
-void ElectraApp::execute(const char *filename) {}
 
 void ElectraApp::buttonDown(uint8_t buttonId) {
-    if (buttonId == 1) {
-        rack_.setLabel("");
-        page_.setLabel("");
-        module_.setLabel("");
-    }
 }
 
 void ElectraApp::potMove(uint8_t potId, int16_t relativeChange) {}
@@ -269,10 +239,6 @@ void ElectraApp::runUserTask(void) {}
 
 void ElectraApp::handleIncomingControlMessage(MidiInput &, MidiMessage &) {}
 
-bool ElectraApp::handleCtrlFileReceived(LocalFile,
-                                        ElectraCommand::Object object) {
-    return (true);
-}
 
 MidiBase *ElectraApp::getMidi(void) { return (&midi_); }
 
@@ -356,7 +322,7 @@ bool ElectraApp::handleE1SysEx(Kontrol::ChangeSource src,
     bool valid = sysex.readHeader();
     if (!valid) {
         logMessage("invalid sysex header");
-    };
+    }
     char msgid = sysex.read();
 
     switch (msgid) {
