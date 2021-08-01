@@ -14,6 +14,7 @@
 #include "Electra.h"
 #include "SysExStream.h"
 
+#include "Debug.h"
 
 class E1KontrolCallback;
 
@@ -71,6 +72,7 @@ private:
 
 
     MainWindow mainWindow_;
+    DebugWindow debugWindow_;
     AppWindows windows_;
     MidiBase midi_;
 };

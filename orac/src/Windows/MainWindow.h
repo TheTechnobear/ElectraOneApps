@@ -18,7 +18,7 @@ public:
         doNotUseControlSets();
     }
 
-    void paint(void) {
+    void paint(void) override {
         screen.fillRect(screenX, screenY, width - 1, height - 1, COLOR_BLACK);
 
         Window::paint();

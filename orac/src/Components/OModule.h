@@ -87,6 +87,11 @@ public:
 
         } else {
             //already exists
+//            auto page = pages_[p.id()];
+//            if (page->isVisible()) {
+//                page->repaint();
+//            }
+//            repaint();
         }
     }
 

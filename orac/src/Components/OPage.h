@@ -50,7 +50,7 @@ public:
             unsigned y = screenY + 3 + ((pos / 2) * (h + 3));
 
             ctrl->setBounds(x, y, w, h);
-            ctrl->setVisible(isVisible());
+            ctrl->setVisible(parent_->isVisible());
 //            ctrl->setDimmed(pos != 0);
 //            ctrl->setActive(parent_->isActive());
 

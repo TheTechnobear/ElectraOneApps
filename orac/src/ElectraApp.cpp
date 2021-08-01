@@ -147,7 +147,8 @@ private:
 
 
 ElectraApp::ElectraApp() {
-    windows_.setCurrentWindow(&mainWindow_);
+    windows_.add(&mainWindow_);
+    if (DebugWindow::debugWindow()) windows_.add(DebugWindow::debugWindow());
 }
 
 
@@ -163,7 +164,7 @@ void ElectraApp::setup(void) {
         appSetup.useDefault();
     }
 
-    auto window = currentWindow();
+    auto window = windows_.getCurrentWindow();
 
     unsigned ypos = 30;
 
@@ -178,7 +179,20 @@ void ElectraApp::setup(void) {
 
 
 void ElectraApp::buttonDown(uint8_t buttonId) {
-    logMessage(" ElectraApp::buttonDown %d", buttonId);
+//    logMessage(" ElectraApp::buttonDown %d", buttonId);
+    static unsigned ctr = 0;
+    ctr++;
+    dbgMessage("button counter %d", ctr);
+    switch (buttonId) {
+        case 3: {
+            flushDebug();
+            break;
+        }
+        case 6: {
+            windows_.nextWindow();
+            break;
+        }
+    }
 }
 
 void ElectraApp::potMove(uint8_t potId, int16_t relativeChange) {}
@@ -223,7 +237,9 @@ void ElectraApp::handleIncomingMidiMessage(MidiInput &midiInput,
 void ElectraApp::handleIncomingSysexMessage(MidiInput &midiInput,
                                             SysexMessage &midiMessage) {}
 
-void ElectraApp::runUserTask(void) {}
+void ElectraApp::runUserTask(void) {
+//    flushDebug();
+}
 
 void ElectraApp::handleIncomingControlMessage(MidiInput &, MidiMessage &) {}
 
@@ -350,8 +366,10 @@ bool ElectraApp::handleE1SysEx(Kontrol::ChangeSource src,
             std::string displayName = sysex.readString();
             std::string type = sysex.readString();
 
-            // logMessage("E1_MODULE_MSG %s %s %s %s", rackId.c_str(), moduleId.c_str(),
-            //            displayName.c_str(), type.c_str());
+            dbgMessage("E1_MODULE_MSG %s %s %s %s", rackId.c_str(), moduleId.c_str(),
+                       displayName.c_str(), type.c_str());
+//             logMessage("E1_MODULE_MSG %s %s %s %s", rackId.c_str(), moduleId.c_str(),
+//                        displayName.c_str(), type.c_str());
             model->createModule(src, rackId, moduleId, displayName, type);
             break;
         }

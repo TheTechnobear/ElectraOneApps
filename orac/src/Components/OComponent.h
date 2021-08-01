@@ -61,8 +61,11 @@ public:
     void paintUpdate(void) override { paint(); }
 
     void paint(void) override {
-        for (auto &c : children_) {
-            c->paint();
+        if(isVisible()) {
+            for (auto &c : children_) {
+//                if(c->isVisible()) c->paint();
+                c->paint();
+            }
         }
     }
 
