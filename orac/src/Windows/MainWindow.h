@@ -36,6 +36,10 @@ public:
                 rack->setBounds(screenX, screenY + header, width, height - header);
                 addAndMakeVisible(rack.get());
                 rack->repaint();
+
+                for (unsigned enc = 0; enc < 12; enc++) {
+                    assignPot(enc, 0, rack.get(), enc);
+                }
             }
         }
     }

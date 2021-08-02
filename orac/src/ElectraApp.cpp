@@ -182,7 +182,7 @@ void ElectraApp::buttonDown(uint8_t buttonId) {
 //    logMessage(" ElectraApp::buttonDown %d", buttonId);
     static unsigned ctr = 0;
     ctr++;
-    dbgMessage("button counter %d", ctr);
+//    dbgMessage("button counter %d", ctr);
     switch (buttonId) {
         case 3: {
             flushDebug();
@@ -366,10 +366,8 @@ bool ElectraApp::handleE1SysEx(Kontrol::ChangeSource src,
             std::string displayName = sysex.readString();
             std::string type = sysex.readString();
 
-            dbgMessage("E1_MODULE_MSG %s %s %s %s", rackId.c_str(), moduleId.c_str(),
-                       displayName.c_str(), type.c_str());
-//             logMessage("E1_MODULE_MSG %s %s %s %s", rackId.c_str(), moduleId.c_str(),
-//                        displayName.c_str(), type.c_str());
+//            dbgMessage("E1_MODULE_MSG %s %s %s %s", rackId.c_str(), moduleId.c_str(),
+//                       displayName.c_str(), type.c_str());
             model->createModule(src, rackId, moduleId, displayName, type);
             break;
         }

@@ -17,19 +17,6 @@ public:
 
     ~OracModule() {}
 
-//    void assignToWindow(Window *window) override {
-//        // assign sub components
-//
-//    }
-
-//    void visibilityChanged() override {
-//    }
-
-//    void resized() override {
-//        // resize sub components
-//    }
-
-
     void paint(void) {
         clearBackground();
         OComponent::paint();
@@ -43,48 +30,56 @@ public:
         }
     }
 
-    void addPage(const Kontrol::Rack &r, const Kontrol::Module &m, const Kontrol::Page &p) {
-        if (r.id() != rackId_) { logMessage("ASSERT OracModule::addPage - invalid rack"); }
-        if (m.id() != moduleId_) { logMessage("ASSERT OracModule::addPage - invalid module"); }
+    void onPotChange(int16_t relativeChange, handle_t handle = 0) override {
+        if (isVisible() && isActive()) {
+            unsigned pageN = ((handle % 6) / 2) + displayOffset_;
+            if (pageN < displayOrder_.size()) {
+                auto id = displayOrder_[pageN];
+                if (pages_.count(id) > 0) {
+                    auto page = pages_[id];
+                    unsigned c = (handle % 2);
+                    unsigned r = (handle / 6);
+                    unsigned enc = (r * 2) + c;
+                    page->onPotChange(relativeChange, enc);
+                }
+            }
+        }
+    }
 
-        static uint16_t clrs_[3] = {ElectraColours::getNumericRgb565(ElectraColours::red),
-                                    ElectraColours::getNumericRgb565(ElectraColours::orange),
-                                    ElectraColours::getNumericRgb565(ElectraColours::blue)};
+    void addPage(const Kontrol::Rack &r, const Kontrol::Module &m, const Kontrol::Page &p) {
+        if (r.id() != rackId_) { dbgMessage("ASSERT OracModule::addPage - invalid rack"); }
+        if (m.id() != moduleId_) { dbgMessage("ASSERT OracModule::addPage - invalid module"); }
+
+        static uint16_t clrs_[MAX_DISPLAY] = {ElectraColours::getNumericRgb565(ElectraColours::red),
+                                              ElectraColours::getNumericRgb565(ElectraColours::orange),
+                                              ElectraColours::getNumericRgb565(ElectraColours::blue)};
         // uint16_t clrs_[3] = {rgbToRgb565(0xF, 0x0, 0x0), gbToRgb565(0x0, 0xF, 0x0),
         //                      rgbToRgb565(0x0, 0x0, 0xF)};
 
-
-
-        auto i = pages_.find(p.id());
-        if (i == pages_.end()) {
-
+        if (pages_.count(p.id()) == 0) {
             auto page = std::make_shared<OracPage>(r, m, p, this);
             pages_[p.id()] = page;
 
-            //TODO - position is dynamic
-            unsigned constexpr NPAGE = 3;
-            unsigned pos = pages_.size() - 1;
-            unsigned posmod = pos % NPAGE;
+            // TODO use page order?
+            displayOrder_.push_back(p.id());
+
+            unsigned pidx = displayOrder_.size() - 1;
+            page->setFgColour(clrs_[pidx % MAX_DISPLAY]);
+            page->setId(pidx);
+            page->setVisible(false);
+            page->setDimmed(false);
+            page->setActive(false);
+
             unsigned h = height - 4;
-            unsigned w = (width - 60) / NPAGE;
-            unsigned x = screenX + 50 + (w * posmod);
-            unsigned y = screenY + 2;
-            page->setFgColour(clrs_[posmod]);
-            page->setId(pos);
-            page->setBounds(x, y, w, h);
-            page->setVisible(isVisible() && pos < NPAGE);
-            page->setDimmed(pos != 0);
-            page->setActive(pos < NPAGE); //TODO?
+            unsigned w = (width - 60) / MAX_DISPLAY;
+            page->setBounds(screenX, screenY, w, h);
 
             getParentWindow()->addComponent(page.get());
             add(page);
+
             page->assignToWindow(getParentWindow());
-
             page->initParams();
-            if (page->isVisible()) {
-                page->repaint();
-            }
-
+            reposition();
         } else {
             //already exists
 //            auto page = pages_[p.id()];
@@ -95,9 +90,61 @@ public:
         }
     }
 
+    void nextDisplay() {
+        if ((displayIdx_ + 1) < displayOrder_.size()) {
+            displayIdx_++;
+            if ((displayIdx_ - displayOffset_) > MAX_DISPLAY) {
+                displayOffset_ = displayIdx_ - MAX_DISPLAY;
+                reposition();
+            }
+        }
+    }
+
+    void prevDisplay() {
+        if (displayIdx_ > 0) {
+            displayIdx_--;
+            if ((displayOffset_ + displayIdx_) > MAX_DISPLAY) {
+                displayOffset_ = displayIdx_;
+                reposition();
+            }
+        }
+    }
+
+    void reposition() {
+        unsigned idx = 0;
+//        unsigned h = height - 4;
+        unsigned w = (width - 60) / MAX_DISPLAY;
+        for (auto id: displayOrder_) {
+            bool vis = isVisible()
+                       && (idx >= displayOffset_ && (idx < displayOffset_ + MAX_DISPLAY));
+            bool act = vis && (idx == displayIdx_);
+            if (pages_.count(id) > 0) {
+                auto page = pages_[id];
+                if (vis) {
+                    unsigned x = screenX + 50 + ((idx - displayOffset_) * w);
+                    unsigned y = screenY + 2;
+                    page->setPosition(x, y);
+                }
+                page->setVisible(vis);
+                page->setDimmed(!act);
+                page->setActive(act);
+
+                page->reposition();
+            }
+            idx++;
+        }
+        repaint();
+    }
+
+
 private:
+
     Kontrol::EntityId rackId_;
     Kontrol::EntityId moduleId_;
+
+    static constexpr unsigned MAX_DISPLAY = 3;
+    unsigned displayOffset_ = 0, displayIdx_ = 0;
+    std::vector<Kontrol::EntityId> displayOrder_;
 
     std::shared_ptr<Kontrol::KontrolModel> model_;
     std::map<Kontrol::EntityId, std::shared_ptr<OracPage>> pages_;

@@ -61,10 +61,10 @@ public:
     void paintUpdate(void) override { paint(); }
 
     void paint(void) override {
-        if(isVisible()) {
+        if (isVisible()) {
             for (auto &c : children_) {
-//                if(c->isVisible()) c->paint();
-                c->paint();
+                if (c->isVisible()) c->paint();
+//                c->paint();
             }
         }
     }
@@ -96,6 +96,14 @@ public:
     void setFgColour(uint16_t clr) { fgClr_ = clr; }
 
     void setBgColour(uint16_t clr) { bgClr_ = clr; }
+
+    void setPosition(unsigned newX, unsigned newY) {
+        setBounds(newX, newY, width, height);
+    }
+
+    void setSize(unsigned newW, unsigned newH) {
+        setBounds(screenX, screenY, newW, newH);
+    }
 
 protected:
     uint16_t bgClr_ = 0x0000;

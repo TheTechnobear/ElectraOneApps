@@ -21,6 +21,7 @@ public:
     ~OracParam() {}
 
     void paint(void) {
+//        dbgMessage("paint param %s", (moduleId_+":"+paramId_).c_str());
         clearBackground();
         OComponent::paint();
 
@@ -31,44 +32,19 @@ public:
         drawBorder();
 
         if (param) {
-            screen.fillRoundRect(screenX + 25, screenY + 10, width - 50, 16, 5, COLOR_WHITE);
+            screen.fillRoundRect(screenX + 25, screenY + 10, width - 50, 16, 3, COLOR_WHITE);
 
             float value = param->asFloat(param->current());
-            if (value > 1.0f || value < 0.0f) value = 0.5f;
+            unsigned vw = float(width - 50) * value;
+            static constexpr unsigned minW = 6;
+            if (vw <= minW) vw = minW;
 
-            screen.fillRoundRect(screenX + 25, screenY + 10, float(width - 50) * value, 16, 5, ElectraColours::getNumericRgb565(ElectraColours::red));
+            screen.fillRoundRect(screenX + 25, screenY + 10, vw, 16, 3, ElectraColours::getNumericRgb565(ElectraColours::red));
 
             screen.printText(screenX, screenY + 50, param->displayName().c_str(),
                              TextStyle::smallWhiteOnBlack, width,
                              TextAlign::center);
         }
-
-
-//        uint16_t nameH = 12;
-//        int r = (height - 1 - nameH) / 2;
-//        // screen.drawRect(screenX, screenY, width - 1, height - 1, COLOR_WHITE);
-//
-//        int xc = screenX + 1 + r + (nameH / 2);
-//        int yc = screenY + 1 + r;
-//
-//        screen.drawCircle(xc, yc, r, COLOR_WHITE);
-//
-//        float value = 0.0f;
-//
-//        if (param) {
-//            auto &name = param->displayName();
-//            int y = screenY + height - 2 - nameH;
-//            screen.printText(screenX + 1, y, name.c_str(),
-//                             TextStyle::smallWhiteOnBlack, width - 2,
-//                             TextAlign::center);
-//            value = param->asFloat(param->current());
-//        }
-//
-////        float ph = value + 0.25f;
-//        float ph = (value * 0.9f) + 0.05f + 0.25f;
-//        int xe = (cosf(ph * 2 * PI) * float(r));
-//        int ye = (sinf(ph * 2 * PI) * float(r));
-//        screen.drawLine(xc, yc, xe, ye, COLOR_WHITE);
     }
 
     void onPotChange(int16_t relativeChange, handle_t handle = 0) override {

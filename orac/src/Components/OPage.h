@@ -20,7 +20,6 @@ public:
 
     ~OracPage() {}
 
-    void click(unsigned i) { logMessage("clik param %d", i); }
 
     void initParams() {
         auto rack = model_->getRack(rackId_);
@@ -32,42 +31,28 @@ public:
         int pos = 0;
         for (auto param : params) {
             auto ctrl = std::make_shared<OracParam>(*rack, *module, *param, this);
-
             params_.push_back(ctrl);
-
-            unsigned pageN = getId();
-            unsigned enc = ((pos / 2) * 6) + (pos % 2) + (pageN * 2);
-            ctrl->setId(enc);
-            ctrl->onClick = [this, pos](void) {
-                click(pos);
-                return true;
-            };
-
-
             unsigned h = (height - 9) / 2;
             unsigned w = (width - 9) / 2;
-            unsigned x = screenX + 3 + ((pos % 2) * (w + 3));
-            unsigned y = screenY + 3 + ((pos / 2) * (h + 3));
+//            unsigned x = screenX + 3 + ((pos % 2) * (w + 3));
+//            unsigned y = screenY + 3 + ((pos / 2) * (h + 3));
 
-            ctrl->setBounds(x, y, w, h);
-            ctrl->setVisible(parent_->isVisible());
-//            ctrl->setDimmed(pos != 0);
-//            ctrl->setActive(parent_->isActive());
+            ctrl->setBounds(0, 0, w, h);
+            ctrl->setVisible(false);
+            ctrl->setDimmed(false);
+            ctrl->setActive(false);
 
             getParentWindow()->addComponent(ctrl.get());
             add(ctrl);
             ctrl->assignToWindow(getParentWindow());
-            if (enc < 12) getParentWindow()->assignPot(enc, 0, ctrl.get());
-
-            if (ctrl->isVisible()) {
-                ctrl->repaint();
-            }
-
             pos++;
         }
+
+        reposition();
     }
 
     void paint(void) {
+//        dbgMessage("paint page %s", (moduleId_+":"+pageId_).c_str());
         clearBackground();
 
         OComponent::paint();
@@ -91,15 +76,42 @@ public:
         }
     }
 
+    void onPotChange(int16_t relativeChange, handle_t handle = 0) override {
+        unsigned enc = handle;
+        if (enc < params_.size()) {
+            auto param = params_[enc];
+            param->onPotChange(relativeChange, enc);
+        }
+    }
+
+
+    void reposition() {
+        // reposition ctrls, due to this page being moved
+        bool vis = isVisible();
+        bool act = vis;
+
+        unsigned h = (height - 9) / 2;
+        unsigned w = (width - 9) / 2;
+
+        int pos = 0;
+        for (auto ctrl : params_) {
+            if (vis) {
+                unsigned x = screenX + 3 + ((pos % 2) * (w + 3));
+                unsigned y = screenY + 3 + ((pos / 2) * (h + 3));
+                ctrl->setPosition(x, y);
+            }
+            ctrl->setVisible(vis);
+            ctrl->setDimmed(!act);
+            ctrl->setActive(act);
+            pos++;
+        }
+    }
+
 private:
     Kontrol::EntityId rackId_;
     Kontrol::EntityId moduleId_;
     Kontrol::EntityId pageId_;
 
     std::shared_ptr<Kontrol::KontrolModel> model_;
-
-//    static constexpr unsigned MAX_PARAMS = 4;
     std::vector<std::shared_ptr<OracParam>> params_;
-
-//    unsigned pageN_ = 0;
 };
