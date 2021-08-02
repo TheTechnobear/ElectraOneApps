@@ -63,8 +63,8 @@ public:
     void paint(void) override {
         if (isVisible()) {
             for (auto &c : children_) {
+//                if (c->isVisible()) c->repaint();
                 if (c->isVisible()) c->paint();
-//                c->paint();
             }
         }
     }
@@ -86,7 +86,8 @@ public:
     void add(std::shared_ptr<OComponent> c) { children_.push_back(c); }
 
     void clearBackground() {
-        screen.fillRect(screenX, screenY, width - 1, height - 1, bgClr_);
+        screen.fillRect(screenX, screenY, width, height, bgClr_);
+//        screen.fillRect(screenX, screenY, width - 1, height - 1, bgClr_);
     }
 
     void drawBorder() {

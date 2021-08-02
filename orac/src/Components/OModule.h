@@ -20,13 +20,23 @@ public:
     void paint(void) {
         clearBackground();
         OComponent::paint();
-        drawBorder();
+
+        if (isActive()) drawBorder();
 
         auto rack = model_->getRack(rackId_);
         auto module = model_->getModule(rack, moduleId_);
         if (rack && module) {
-            screen.printText(screenX, screenY + 2, module->id().c_str(), TextStyle::smallWhiteOnBlack, width, TextAlign::left);
-            screen.printText(screenX, screenY + 50, module->displayName().c_str(), TextStyle::smallWhiteOnBlack, width, TextAlign::left);
+            screen.printText(screenX + 10, screenY + 10, module->id().c_str(), TextStyle::smallWhiteOnBlack, width, TextAlign::left);
+
+            if(module->displayName().length()<6) {
+                screen.printText(screenX + 10, screenY + 50, module->displayName().c_str(), TextStyle::smallWhiteOnBlack, width, TextAlign::left);
+            } else {
+                std::string s1 = module->displayName().substr(0,5);
+                std::string s2 = module->displayName().substr(5);
+                screen.printText(screenX + 10, screenY + 50, s1.c_str(), TextStyle::smallWhiteOnBlack, width, TextAlign::left);
+                screen.printText(screenX + 10, screenY + 70, s2.c_str(), TextStyle::smallWhiteOnBlack, width, TextAlign::left);
+
+            }
         }
     }
 
@@ -46,7 +56,10 @@ public:
         }
     }
 
+    void visibilityChanged() override {}
+
     void addPage(const Kontrol::Rack &r, const Kontrol::Module &m, const Kontrol::Page &p) {
+
         if (r.id() != rackId_) { dbgMessage("ASSERT OracModule::addPage - invalid rack"); }
         if (m.id() != moduleId_) { dbgMessage("ASSERT OracModule::addPage - invalid module"); }
 
@@ -70,7 +83,7 @@ public:
             page->setDimmed(false);
             page->setActive(false);
 
-            unsigned h = height - 4;
+            unsigned h = height - 20;
             unsigned w = (width - 60) / MAX_DISPLAY;
             page->setBounds(screenX, screenY, w, h);
 
@@ -90,29 +103,49 @@ public:
         }
     }
 
+
+    std::shared_ptr<OracPage> getActivePage() {
+        if (displayIdx_ < displayOrder_.size()) {
+            auto id = displayOrder_[displayIdx_];
+            if (pages_.count(id) > 0) {
+                return pages_[id];
+            }
+        }
+        return nullptr;
+    }
+
     void nextDisplay() {
         if ((displayIdx_ + 1) < displayOrder_.size()) {
+            getActivePage()->setActive(false);
             displayIdx_++;
-            if ((displayIdx_ - displayOffset_) > MAX_DISPLAY) {
-                displayOffset_ = displayIdx_ - MAX_DISPLAY;
+            if ((displayIdx_ - displayOffset_) >= MAX_DISPLAY) {
+                displayOffset_ = displayIdx_ - (MAX_DISPLAY - 1);
                 reposition();
+            } else {
+                getActivePage()->setActive(true);
+                repaint();
             }
         }
     }
 
     void prevDisplay() {
         if (displayIdx_ > 0) {
+            getActivePage()->setActive(false);
             displayIdx_--;
-            if ((displayOffset_ + displayIdx_) > MAX_DISPLAY) {
+            if ((displayIdx_ - displayOffset_) >= MAX_DISPLAY) {
                 displayOffset_ = displayIdx_;
                 reposition();
+            } else {
+                getActivePage()->setActive(true);
+                repaint();
             }
         }
     }
 
+
     void reposition() {
         unsigned idx = 0;
-//        unsigned h = height - 4;
+//        unsigned h = height - 20;
         unsigned w = (width - 60) / MAX_DISPLAY;
         for (auto id: displayOrder_) {
             bool vis = isVisible()
@@ -122,14 +155,14 @@ public:
                 auto page = pages_[id];
                 if (vis) {
                     unsigned x = screenX + 50 + ((idx - displayOffset_) * w);
-                    unsigned y = screenY + 2;
+                    unsigned y = screenY + 10;
                     page->setPosition(x, y);
                 }
                 page->setVisible(vis);
                 page->setDimmed(!act);
                 page->setActive(act);
 
-                page->reposition();
+                page->reposition();// TODO: resized?
             }
             idx++;
         }

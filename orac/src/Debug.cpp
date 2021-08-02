@@ -54,7 +54,7 @@ DebugWindow *DebugWindow::debugWindow() {
 }
 
 void DebugWindow::paint(void) {
-    screen.fillRect(screenX, screenY, width - 1, height - 1, COLOR_BLACK);
+    screen.fillRect(screenX, screenY, width, height, COLOR_BLACK);
     Window::paint();
     static const unsigned th = 20;
     static const unsigned nMsgDisp = (height - 50) / th;

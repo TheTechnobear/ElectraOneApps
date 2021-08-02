@@ -18,7 +18,7 @@ public:
         clearBackground();
         OComponent::paint();
 
-        drawBorder();
+//        drawBorder();
         auto rack = model_->getRack(rackId_);
         if (rack) {
 //            screen.printText(screenX , screenY + 2 , rack->displayName().c_str(), TextStyle::smallWhiteOnBlack, width , TextAlign::center);
@@ -34,6 +34,8 @@ public:
             }
         }
     }
+
+    void visibilityChanged() override {}
 
     void addModule(const Kontrol::Rack &r, const Kontrol::Module &m) {
         if (r.id() != rackId_) { dbgMessage("ASSERT OracRack::addModule"); }
@@ -69,22 +71,42 @@ public:
         return nullptr;
     }
 
+
+    std::shared_ptr<OracModule> getActiveModule() {
+        if (displayIdx_ < displayOrder_.size()) {
+            auto id = displayOrder_[displayIdx_];
+            if (modules_.count(id) > 0) {
+                return modules_[id];
+            }
+        }
+        return nullptr;
+    }
+
+
     void nextDisplay() {
         if ((displayIdx_ + 1) < displayOrder_.size()) {
+            getActiveModule()->setActive(false);
             displayIdx_++;
-            if ((displayIdx_ - displayOffset_) > MAX_DISPLAY) {
-                displayOffset_ = displayIdx_ - MAX_DISPLAY;
+            if ((displayIdx_ - displayOffset_) >= MAX_DISPLAY) {
+                displayOffset_ = displayIdx_ - (MAX_DISPLAY - 1);
                 reposition();
+            } else {
+                getActiveModule()->setActive(true);
+                repaint();
             }
         }
     }
 
     void prevDisplay() {
         if (displayIdx_ > 0) {
+            getActiveModule()->setActive(false);
             displayIdx_--;
-            if ((displayOffset_ + displayIdx_) > MAX_DISPLAY) {
+            if ((displayIdx_ - displayOffset_) >= MAX_DISPLAY) {
                 displayOffset_ = displayIdx_;
                 reposition();
+            } else {
+                getActiveModule()->setActive(true);
+                repaint();
             }
         }
     }
@@ -100,13 +122,14 @@ public:
             if (modules_.count(id) > 0) {
                 auto module = modules_[id];
                 if (vis) {
-                    unsigned x = screenX + 2;
-                    unsigned y = screenY + 2 + ((idx - displayOffset_) * h);
+                    unsigned x = screenX + 5;
+                    unsigned y = screenY + 5 + ((idx - displayOffset_) * h);
                     module->setPosition(x, y);
                 }
                 module->setVisible(vis);
                 module->setDimmed(!act);
                 module->setActive(act);
+                module->reposition(); // TODO: resized?
             }
             idx++;
         }

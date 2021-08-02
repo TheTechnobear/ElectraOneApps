@@ -25,23 +25,26 @@ public:
         clearBackground();
         OComponent::paint();
 
+//        drawBorder();
+
         auto rack = model_->getRack(rackId_);
         auto module = model_->getModule(rack, moduleId_);
         auto param = model_->getParam(module, paramId_);
 
-        drawBorder();
 
         if (param) {
-            screen.fillRoundRect(screenX + 25, screenY + 10, width - 50, 16, 3, COLOR_WHITE);
+            unsigned bw = width - 15;
+            screen.fillRoundRect(screenX + 7, screenY + 5, bw, 24, 3, COLOR_WHITE);
 
             float value = param->asFloat(param->current());
-            unsigned vw = float(width - 50) * value;
+            unsigned vw = float(bw) * value;
             static constexpr unsigned minW = 6;
             if (vw <= minW) vw = minW;
 
-            screen.fillRoundRect(screenX + 25, screenY + 10, vw, 16, 3, ElectraColours::getNumericRgb565(ElectraColours::red));
+            screen.fillRoundRect(screenX + 7, screenY + 5, vw, 24, 3, fgClr_);
 
-            screen.printText(screenX, screenY + 50, param->displayName().c_str(),
+            screen.printText(screenX, screenY + height - 20,
+                             param->displayName().c_str(),
                              TextStyle::smallWhiteOnBlack, width,
                              TextAlign::center);
         }
@@ -56,10 +59,8 @@ public:
 
         if (rack && module && param) {
             float chg = float(relativeChange / 256.0f);
-            logMessage("change %d %f", relativeChange, chg);
             Kontrol::ParamValue calc = param->calcRelative(chg);
-            model_->changeParam(Kontrol::CS_LOCAL, rackId_, moduleId_, paramId_,
-                                calc);
+            model_->changeParam(Kontrol::CS_LOCAL, rackId_, moduleId_, paramId_, calc);
             repaint();
         }
     }

@@ -32,11 +32,12 @@ public:
         for (auto param : params) {
             auto ctrl = std::make_shared<OracParam>(*rack, *module, *param, this);
             params_.push_back(ctrl);
-            unsigned h = (height - 9) / 2;
-            unsigned w = (width - 9) / 2;
-//            unsigned x = screenX + 3 + ((pos % 2) * (w + 3));
-//            unsigned y = screenY + 3 + ((pos / 2) * (h + 3));
+            unsigned w = (width - 25) / 2;
+            unsigned h = (height - 30) / 2;
+//            unsigned x = screenX + 5 + ((pos % 2) * (w + 5));
+//            unsigned y = screenY + 20 + ((pos / 2) * (h + 5));
 
+            ctrl->setFgColour(fgClr_);
             ctrl->setBounds(0, 0, w, h);
             ctrl->setVisible(false);
             ctrl->setDimmed(false);
@@ -61,7 +62,7 @@ public:
         auto module = model_->getModule(rack, moduleId_);
         auto page = model_->getPage(module, pageId_);
 
-        drawBorder();
+//        drawBorder();
 
         if (page) {
             auto &name = page->displayName();
@@ -69,6 +70,9 @@ public:
             screen.printText(screenX + 1, screenY + 1, name.c_str(),
                              TextStyle::smallWhiteOnBlack, width - 2,
                              TextAlign::center);
+            if (isActive()) {
+                screen.drawLine(screenX + 30, screenY + 18, width - 60, 0, COLOR_WHITE);
+            }
         }
 
         if (active_) {
@@ -88,16 +92,16 @@ public:
     void reposition() {
         // reposition ctrls, due to this page being moved
         bool vis = isVisible();
-        bool act = vis;
+        bool act = vis && isActive();
 
-        unsigned h = (height - 9) / 2;
-        unsigned w = (width - 9) / 2;
+        unsigned w = (width - 25) / 2;
+        unsigned h = (height - 30) / 2;
 
         int pos = 0;
         for (auto ctrl : params_) {
             if (vis) {
-                unsigned x = screenX + 3 + ((pos % 2) * (w + 3));
-                unsigned y = screenY + 3 + ((pos / 2) * (h + 3));
+                unsigned x = screenX + 5 + ((pos % 2) * (w + 5));
+                unsigned y = screenY + 20 + ((pos / 2) * (h + 5));
                 ctrl->setPosition(x, y);
             }
             ctrl->setVisible(vis);

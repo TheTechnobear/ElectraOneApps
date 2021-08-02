@@ -92,9 +92,9 @@ public:
             if (rackpage) {
                 auto modulepage = rackpage->getModule(module.id());
                 if (modulepage) {
-                    // TODO
-                    // need to look for param page, and only repaint that
-                    modulepage->repaint();
+                    // TODO - need to look for param, and only repaint that ?
+//                    dbgMessage("E1KontrolCallback::changed");
+                    if(modulepage->isVisible()) modulepage->repaint();
                 }
             }
         }
@@ -179,13 +179,40 @@ void ElectraApp::setup(void) {
 
 
 void ElectraApp::buttonDown(uint8_t buttonId) {
-//    logMessage(" ElectraApp::buttonDown %d", buttonId);
-    static unsigned ctr = 0;
-    ctr++;
+//    static unsigned ctr = 0;
+//    ctr++;
 //    dbgMessage("button counter %d", ctr);
     switch (buttonId) {
+        case 1 : {
+            if (windows_.getCurrentWindow() != &mainWindow()) return;
+            if (mainWindow_.getActiveRack()) {
+                mainWindow_.getActiveRack()->prevDisplay();
+            }
+            break;
+        }
+        case 2 : {
+            if (windows_.getCurrentWindow() != &mainWindow()) return;
+            if (mainWindow_.getActiveRack()) {
+                mainWindow_.getActiveRack()->nextDisplay();
+            }
+            break;
+        }
         case 3: {
             flushDebug();
+            break;
+        }
+        case 4 : {
+            if (windows_.getCurrentWindow() != &mainWindow()) return;
+            if (mainWindow_.getActiveRack() && mainWindow_.getActiveRack()->getActiveModule()) {
+                mainWindow_.getActiveRack()->getActiveModule()->prevDisplay();
+            }
+            break;
+        }
+        case 5 : {
+            if (windows_.getCurrentWindow() != &mainWindow()) return;
+            if (mainWindow_.getActiveRack() && mainWindow_.getActiveRack()->getActiveModule()) {
+                mainWindow_.getActiveRack()->getActiveModule()->nextDisplay();
+            }
             break;
         }
         case 6: {
@@ -195,7 +222,9 @@ void ElectraApp::buttonDown(uint8_t buttonId) {
     }
 }
 
-void ElectraApp::potMove(uint8_t potId, int16_t relativeChange) {}
+void ElectraApp::potMove(uint8_t potId, int16_t relativeChange) {
+
+}
 
 void ElectraApp::potTouchDown(uint8_t potId) {
     auto window = currentWindow();
