@@ -183,10 +183,10 @@ public:
 private:
 
     unsigned char peek(unsigned pos) {
-        if (pos_ < size_) {
-            return sysexBlock_.peek(pos_);
+        if (pos < size_) {
+            return sysexBlock_.peek(pos);
         }
-        logMessage("SysExInputStream read past end %d > %d", pos_, size_);
+        logMessage("SysExInputStream read past end %d > %d", pos, size_);
         return 0;
     }
 

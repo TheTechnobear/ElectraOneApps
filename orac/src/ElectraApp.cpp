@@ -94,7 +94,7 @@ public:
                 if (modulepage) {
                     // TODO - need to look for param, and only repaint that ?
 //                    dbgMessage("E1KontrolCallback::changed");
-                    if(modulepage->isVisible()) modulepage->repaint();
+                    if (modulepage->isVisible()) modulepage->repaint();
                 }
             }
         }
@@ -353,9 +353,13 @@ bool ElectraApp::handleE1SysEx(Kontrol::ChangeSource src,
                                SysExInputStream &sysex,
                                std::shared_ptr<Kontrol::KontrolModel> model) {
     bool valid = sysex.readHeader();
-    if (!valid) {
-        logMessage("invalid sysex header");
+    if (!sysex.isValid()) {
+        dbgMessage("handleE1SysEx :: invalid sysex header");
     }
+    if (!valid) {
+        dbgMessage("invalid sysex header");
+    }
+
     char msgid = sysex.read();
 
     switch (msgid) {
@@ -394,7 +398,6 @@ bool ElectraApp::handleE1SysEx(Kontrol::ChangeSource src,
             Kontrol::EntityId moduleId = tokenString(sysex.readUnsigned());
             std::string displayName = sysex.readString();
             std::string type = sysex.readString();
-
 //            dbgMessage("E1_MODULE_MSG %s %s %s %s", rackId.c_str(), moduleId.c_str(),
 //                       displayName.c_str(), type.c_str());
             model->createModule(src, rackId, moduleId, displayName, type);
