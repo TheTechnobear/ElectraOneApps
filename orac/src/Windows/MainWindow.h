@@ -1,11 +1,10 @@
 #pragma once
 
-#include <Window.h>
-
+#include "OWindow.h"
 
 #include "Components/ORack.h"
 
-class MainWindow : public Window {
+class MainWindow : public OWindow {
 public:
     explicit MainWindow(uint16_t newX = 0,
                         uint16_t newY = 20,
@@ -13,8 +12,8 @@ public:
                         uint16_t newHeight = 561,
                         bool newPinOptionAvailable = false,
                         bool newWindowPinned = false) :
-        Window({Window::Type::page, newX, newY, newWidth, newHeight,
-                newPinOptionAvailable, newWindowPinned}) {
+        OWindow(newX, newY, newWidth, newHeight,
+                newPinOptionAvailable, newWindowPinned) {
         doNotUseControlSets();
     }
 
@@ -58,7 +57,42 @@ public:
         return nullptr;
     }
 
+    void buttonUp(uint8_t buttonId) override {
+        switch (buttonId) {
+            case 1 : {
+                if (getActiveRack()) {
+                    getActiveRack()->prevDisplay();
+                }
+                break;
+            }
+            case 2 : {
+                if (getActiveRack()) {
+                    getActiveRack()->nextDisplay();
+                }
+                break;
+            }
+            case 3: {
+                break;
+            }
+            case 4 : {
+                if (getActiveRack()->getActiveModule()) {
+                    getActiveRack()->getActiveModule()->prevDisplay();
+                }
+                break;
+            }
+            case 5 : {
+                if (getActiveRack() && getActiveRack()->getActiveModule()) {
+                    getActiveRack()->getActiveModule()->nextDisplay();
+                }
+                break;
+            }
+            case 6: {
+                // note: masked by app
+                break;
+            }
+        }
+    }
+
 private:
     std::map<Kontrol::EntityId, std::shared_ptr<OracRack>> racks_;
-
 };

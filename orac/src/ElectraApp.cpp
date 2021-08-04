@@ -148,15 +148,42 @@ private:
 
 ElectraApp::ElectraApp() {
     windows_.add(&mainWindow_);
+    windows_.add(&menuWindow_);
     if (DebugWindow::debugWindow()) windows_.add(DebugWindow::debugWindow());
 }
 
+
+void ElectraApp::menuNew(void) {
+
+}
 
 void ElectraApp::setup(void) {
     auto cb = std::make_shared<E1KontrolCallback>(this);
     Kontrol::KontrolModel::model()->addCallback("e1", cb);
     context.setAppName(APP_NAME);
     enableMidi = true;
+
+    auto menu = menuWindow_.getMenu();
+    auto modules = menu->addMenu("Brds");
+    auto modules_fx = modules->addMenu("fx");
+    modules_fx->addItem("clds", [this](void) { dbgMessage("clds"); });
+    modules_fx->addItem("dly", [this](void) { dbgMessage("dly"); });
+    auto modules_synth = modules->addMenu("synth");
+    modules_synth->addItem("brds", [this](void) { dbgMessage("brds"); });
+    modules_synth->addItem("lmnts", [this](void) { dbgMessage("lmnts"); });
+    modules_synth->addItem("poly", [this](void) { dbgMessage("poly"); });
+
+    auto presets = menu->addMenu("Demo 1");
+    presets->addItem("Save Preset", [this](void) { dbgMessage("Save Preset"); });
+    presets->addItem("New Preset", [this](void) { dbgMessage("New Preset"); });
+    presets->addItem("Init", [this](void) { dbgMessage("Demo 1"); });
+    presets->addItem("Demo 1", [this](void) { dbgMessage("Demo 1"); });
+    presets->addItem("Demo 2", [this](void) { dbgMessage("Demo 1"); });
+
+    menu->addItem("Midi Learn [x]", [this](void) { menuNew(); });
+    menu->addItem("Mod Learn [x]", [this](void) { dbgMessage("Mod Learn"); });
+    menu->addItem("Save", [this](void) { dbgMessage("Save"); });
+    menu->addItem("Home", [this](void) { dbgMessage("Home"); });
 
     LocalFile config(context.getCurrentConfigFile());
 
@@ -177,63 +204,48 @@ void ElectraApp::setup(void) {
     logMessage("setup completed");
 }
 
-
-void ElectraApp::buttonDown(uint8_t buttonId) {
-//    static unsigned ctr = 0;
-//    ctr++;
-//    dbgMessage("button counter %d", ctr);
-    switch (buttonId) {
-        case 1 : {
-            if (windows_.getCurrentWindow() != &mainWindow()) return;
-            if (mainWindow_.getActiveRack()) {
-                mainWindow_.getActiveRack()->prevDisplay();
-            }
-            break;
-        }
-        case 2 : {
-            if (windows_.getCurrentWindow() != &mainWindow()) return;
-            if (mainWindow_.getActiveRack()) {
-                mainWindow_.getActiveRack()->nextDisplay();
-            }
-            break;
-        }
-        case 3: {
-            flushDebug();
-            break;
-        }
-        case 4 : {
-            if (windows_.getCurrentWindow() != &mainWindow()) return;
-            if (mainWindow_.getActiveRack() && mainWindow_.getActiveRack()->getActiveModule()) {
-                mainWindow_.getActiveRack()->getActiveModule()->prevDisplay();
-            }
-            break;
-        }
-        case 5 : {
-            if (windows_.getCurrentWindow() != &mainWindow()) return;
-            if (mainWindow_.getActiveRack() && mainWindow_.getActiveRack()->getActiveModule()) {
-                mainWindow_.getActiveRack()->getActiveModule()->nextDisplay();
-            }
-            break;
-        }
-        case 6: {
-            windows_.nextWindow();
-            break;
+void ElectraApp::buttonUp(uint8_t buttonId) {
+    if (buttonId == 6) {
+        windows_.nextWindow();
+    } else {
+        auto w = currentWindow();
+        if (w) {
+            w->buttonUp(buttonId);
         }
     }
 }
 
-void ElectraApp::potMove(uint8_t potId, int16_t relativeChange) {
+void ElectraApp::buttonLongHold(uint8_t buttonId) {
+    if (buttonId == 6) {
+        flushDebug();
+    } else {
+        auto w = currentWindow();
+        if (w) {
+            w->buttonLongHold(buttonId);
+        }
+    }
+}
 
+void ElectraApp::buttonDown(uint8_t buttonId) {
+    auto w = currentWindow();
+    if (w) {
+        w->buttonDown(buttonId);
+    }
+}
+
+void ElectraApp::potMove(uint8_t potId, int16_t relativeChange) {
+//    auto w = currentWindow();
+//    w->potMove(potId, relativeChange);
 }
 
 void ElectraApp::potTouchDown(uint8_t potId) {
-    auto window = currentWindow();
-    window->processPotTouch(potId, true);
+    auto w = currentWindow();
+    w->processPotTouch(potId, true);
 }
 
 void ElectraApp::potTouchUp(uint8_t potId) {
-    auto window = currentWindow();
-    window->processPotTouch(potId, false);
+    auto w = currentWindow();
+    w->processPotTouch(potId, false);
 }
 
 void ElectraApp::touchDown(TouchEvent &touchEvent) {
@@ -259,6 +271,7 @@ void ElectraApp::touchLongHold(TouchEvent &touchEvent) {}
 void ElectraApp::touchClick(TouchEvent &touchEvent) {}
 
 void ElectraApp::touchDoubleClick(TouchEvent &touchEvent) {}
+
 
 void ElectraApp::handleIncomingMidiMessage(MidiInput &midiInput,
                                            MidiMessage &midiMessage) {}

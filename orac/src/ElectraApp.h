@@ -10,22 +10,28 @@
 #include "Components/TextComponent.h"
 #include "Windows/AppWindows.h"
 #include "Windows/MainWindow.h"
+#include "Windows/MenuWindow.h"
 
 #include "Electra.h"
 #include "SysExStream.h"
 
 #include "Debug.h"
+#include "IUICallback.h"
+
 
 class E1KontrolCallback;
 
 
-class ElectraApp : public App {
+class ElectraApp : public App, public IUICallback {
 public:
     explicit ElectraApp();
 
     // App
     void setup(void) override;
+    void buttonUp(uint8_t buttonId) override;
     void buttonDown(uint8_t buttonId) override;
+    void buttonLongHold(uint8_t buttonId) override;
+
     void touchDown(TouchEvent &touchEvent) override;
     void touchUp(TouchEvent &touchEvent) override;
     void touchHold(TouchEvent &touchEvent) override;
@@ -50,9 +56,13 @@ public:
 
     bool loadSetup(LocalFile file);
 
-    Window *currentWindow() { return windows_.getCurrentWindow(); }
+    OWindow *currentWindow() { return windows_.current(); }
 
     MainWindow &mainWindow() { return mainWindow_; }
+
+    // menu items
+    void menuNew(void);
+
 
 private:
     friend class E1KontrolCallback;
@@ -72,6 +82,7 @@ private:
 
 
     MainWindow mainWindow_;
+    MenuWindow menuWindow_;
     DebugWindow debugWindow_;
     AppWindows windows_;
     MidiBase midi_;
