@@ -59,34 +59,34 @@ public:
 
     void buttonUp(uint8_t buttonId) override {
         switch (buttonId) {
-            case 1 : {
+            case BUTTON_LEFT_TOP : {
                 if (getActiveRack()) {
                     getActiveRack()->prevDisplay();
                 }
                 break;
             }
-            case 2 : {
+            case BUTTON_LEFT_MIDDLE : {
                 if (getActiveRack()) {
                     getActiveRack()->nextDisplay();
                 }
                 break;
             }
-            case 3: {
+            case BUTTON_LEFT_BOTTOM: {
                 break;
             }
-            case 4 : {
+            case BUTTON_RIGHT_TOP : {
                 if (getActiveRack()->getActiveModule()) {
                     getActiveRack()->getActiveModule()->prevDisplay();
                 }
                 break;
             }
-            case 5 : {
+            case BUTTON_RIGHT_MIDDLE : {
                 if (getActiveRack() && getActiveRack()->getActiveModule()) {
                     getActiveRack()->getActiveModule()->nextDisplay();
                 }
                 break;
             }
-            case 6: {
+            case BUTTON_RIGHT_BOTTOM: {
                 // note: masked by app
                 break;
             }

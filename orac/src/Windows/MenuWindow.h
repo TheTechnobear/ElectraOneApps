@@ -100,17 +100,17 @@ public:
 
     void buttonUp(uint8_t buttonId) override {
         switch (buttonId) {
-            case 1 : {
+            case BUTTON_LEFT_TOP : {
                 menu_->prev();
                 repaint();
                 break;
             }
-            case 2 : {
+            case BUTTON_LEFT_MIDDLE : {
                 menu_->next();
                 repaint();
                 break;
             }
-            case 3 : {
+            case BUTTON_LEFT_BOTTOM : {
                 menu_->select();
                 repaint();
                 break;

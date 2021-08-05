@@ -56,10 +56,6 @@ public:
         }
     }
 
-
-    // Graphics
-    void paintUpdate(void) override { paint(); }
-
     void paint(void) override {
         if (isVisible()) {
             for (auto &c : children_) {

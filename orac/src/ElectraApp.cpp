@@ -205,7 +205,7 @@ void ElectraApp::setup(void) {
 }
 
 void ElectraApp::buttonUp(uint8_t buttonId) {
-    if (buttonId == 6) {
+    if (buttonId == BUTTON_RIGHT_BOTTOM) {
         windows_.nextWindow();
     } else {
         auto w = currentWindow();
@@ -216,7 +216,7 @@ void ElectraApp::buttonUp(uint8_t buttonId) {
 }
 
 void ElectraApp::buttonLongHold(uint8_t buttonId) {
-    if (buttonId == 6) {
+    if (buttonId == BUTTON_RIGHT_BOTTOM) {
         flushDebug();
     } else {
         auto w = currentWindow();
