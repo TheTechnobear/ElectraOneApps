@@ -1,6 +1,6 @@
 #include "Debug.h"
-#include <stdarg.h>
-#include <stdio.h>
+#include <cstdarg>
+#include <cstdio>
 
 #include <Buttons.h>
 
@@ -31,18 +31,18 @@ struct dbgRingBuffer {
         return v;
     }
 
-    bool full() {
+    bool full() const {
         return ((wrPos_ + 1) % MAX_MSGS == rdPos_);
     }
 
-    unsigned n() {
+    unsigned n() const {
         if (wrPos_ < rdPos_) { return (wrPos_ + MAX_MSGS) - rdPos_; }
         return wrPos_ - rdPos_;
     }
 
     void reset() {
-        for (unsigned i = 0; i < MAX_MSGS; i++) {
-            buffer_[i][0] = 0;
+        for (auto &i : buffer_) {
+            i[0] = 0;
         }
         wrPos_ = 0;
         rdPos_ = 0;
@@ -61,7 +61,7 @@ DebugWindow *DebugWindow::debugWindow() {
     return &debugWindow_;
 }
 
-void DebugWindow::paint(void) {
+void DebugWindow::paint() {
     screen.fillRect(screenX, screenY, width, height, COLOR_BLACK);
     Window::paint();
     static const unsigned th = 20;
@@ -76,13 +76,10 @@ void DebugWindow::paint(void) {
     }
 }
 
-void DebugWindow::buttonUp(uint8_t buttonId)  {
-    switch (buttonId) {
-        case BUTTON_LEFT_TOP : {
-            dbgBuf_.reset();
-            repaint();
-            break;
-        }
+void DebugWindow::buttonUp(uint8_t buttonId) {
+    if (buttonId == BUTTON_LEFT_TOP) {
+        dbgBuf_.reset();
+        repaint();
     }
 }
 
@@ -97,7 +94,7 @@ void dbgMessage(const char *format, ...) {
 }
 
 void flushDebug() {
-    char *msg = nullptr;
+    char *msg;
     while ((msg = dbgBuf_.getReadPos())) {
         logMessage(msg);
     }

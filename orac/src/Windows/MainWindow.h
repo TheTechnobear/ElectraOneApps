@@ -17,7 +17,7 @@ public:
         doNotUseControlSets();
     }
 
-    void paint(void) override {
+    void paint() override {
         screen.fillRect(screenX, screenY, width, height, COLOR_BLACK);
         Window::paint();
     }
@@ -44,7 +44,7 @@ public:
     }
 
     std::shared_ptr<OracRack> getActiveRack() {
-        if (racks_.size() > 0) {
+        if (!racks_.empty()) {
             return racks_.begin()->second;
         }
         return nullptr;
@@ -87,8 +87,9 @@ public:
                 }
                 break;
             }
-            case BUTTON_RIGHT_BOTTOM: {
-                // note: masked by app
+            case BUTTON_RIGHT_BOTTOM: // note: masked by app
+            default: {
+
                 break;
             }
         }

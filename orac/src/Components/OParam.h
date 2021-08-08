@@ -18,9 +18,9 @@ public:
         model_ = Kontrol::KontrolModel::model();
     }
 
-    ~OracParam() {}
+    ~OracParam() override = default;
 
-    void paint(void) {
+    void paint() override{
 //        dbgMessage("paint param %s", (moduleId_+":"+paramId_).c_str());
         clearBackground();
         OComponent::paint();
@@ -37,7 +37,7 @@ public:
             screen.fillRoundRect(screenX + 7, screenY + 5, bw, 24, 3, COLOR_WHITE);
 
             float value = param->asFloat(param->current());
-            unsigned vw = float(bw) * value;
+            auto vw = static_cast<unsigned>(float(bw) * value);
             static constexpr unsigned minW = 6;
             if (vw <= minW) vw = minW;
 
@@ -50,7 +50,7 @@ public:
         }
     }
 
-    void onPotChange(int16_t relativeChange, handle_t handle = 0) override {
+    void onPotChange(int16_t relativeChange, handle_t handle) override {
         OComponent::onPotChange(relativeChange, handle);
 
         auto rack = model_->getRack(rackId_);
@@ -58,7 +58,7 @@ public:
         auto param = model_->getParam(module, paramId_);
 
         if (rack && module && param) {
-            float chg = float(relativeChange / 256.0f);
+            auto chg = float(relativeChange) / 256.0f;
             Kontrol::ParamValue calc = param->calcRelative(chg);
             model_->changeParam(Kontrol::CS_LOCAL, rackId_, moduleId_, paramId_, calc);
             repaint();

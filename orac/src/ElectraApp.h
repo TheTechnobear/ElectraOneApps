@@ -27,7 +27,7 @@ public:
     explicit ElectraApp();
 
     // App
-    void setup(void) override;
+    void setup() override;
     void buttonUp(uint8_t buttonId) override;
     void buttonDown(uint8_t buttonId) override;
     void buttonLongHold(uint8_t buttonId) override;
@@ -48,11 +48,11 @@ public:
     void handleIncomingControlMessage(MidiInput &midiInput,
                                       MidiMessage &midiMessage) override;
     void handleElectraSysex(const SysexBlock &sysexBlock) override;
-    void runUserTask(void) override;
+    void runUserTask() override;
 
-    Windows *getWindows(void) override { return (&windows_); }
+    Windows *getWindows() override { return (&windows_); }
 
-    MidiBase *getMidi(void) override;
+    MidiBase *getMidi() override;
 
     bool loadSetup(LocalFile file);
 
@@ -70,15 +70,15 @@ public:
 
 
     // menu items
-    void presetNew(void);
-    void presetSave(void);
-    void modLearn(void);
-    void midiLearn(void);
-    void patchSave(void);
+    void presetNew();
+    void presetSave();
+    void modLearn();
+    void midiLearn();
+    void patchSave();
 
 
-    void moduleSelect(void);
-    void presetSelect(void);
+    void moduleSelect();
+    void presetSelect();
 private:
     friend class E1KontrolCallback;
 

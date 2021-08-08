@@ -99,12 +99,6 @@ public:
             scrollView();
         } else {
 //            dbgMessage("existing Page %s %s", moduleId_.c_str(), p.id().c_str());
-            //already exists
-//            auto page = pages_[p.id()];
-//            if (page->isVisible()) {
-//                page->repaint();
-//            }
-//            repaint();
         }
     }
 

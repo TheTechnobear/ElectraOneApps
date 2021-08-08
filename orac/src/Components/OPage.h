@@ -18,7 +18,7 @@ public:
     }
 
 
-    ~OracPage() {}
+    ~OracPage() override = default;
 
 
     void initParams() {
@@ -29,11 +29,11 @@ public:
         auto params = module->getParams(page);
 
         int pos = 0;
+        const unsigned w = (width - 25) / 2;
+        const unsigned h = (height - 30) / 2;
         for (auto param : params) {
             auto ctrl = std::make_shared<OracParam>(*rack, *module, *param, this);
             params_.push_back(ctrl);
-            unsigned w = (width - 25) / 2;
-            unsigned h = (height - 30) / 2;
 //            unsigned x = screenX + 5 + ((pos % 2) * (w + 5));
 //            unsigned y = screenY + 20 + ((pos / 2) * (h + 5));
 
@@ -53,7 +53,7 @@ public:
         visibilityChanged();
     }
 
-    void paint(void) {
+    void paint() override {
 //        dbgMessage("paint page %s", (moduleId_+":"+pageId_).c_str());
         clearBackground();
 
@@ -81,28 +81,24 @@ public:
         }
     }
 
-    void onPotChange(int16_t relativeChange, handle_t handle = 0) override {
-        unsigned enc = handle;
+    void onPotChange(int16_t relativeChange, handle_t enc) override {
         if (enc < params_.size()) {
-            auto param = params_[enc];
+            auto &param = params_[enc];
             param->onPotChange(relativeChange, enc);
         }
     }
 
     void moved() override {
 //        OComponent::moved();
-//        bool vis = isVisible();
 
-        unsigned w = (width - 25) / 2;
-        unsigned h = (height - 30) / 2;
+        const unsigned w = (width - 25) / 2;
+        const unsigned h = (height - 30) / 2;
 
         int pos = 0;
         for (auto ctrl : params_) {
-//            if (vis) {
-                unsigned x = screenX + 5 + ((pos % 2) * (w + 5));
-                unsigned y = screenY + 20 + ((pos / 2) * (h + 5));
-                ctrl->setPosition(x, y);
-//            }
+            unsigned x = screenX + 5 + ((pos % 2) * (w + 5));
+            unsigned y = screenY + 20 + ((pos / 2) * (h + 5));
+            ctrl->setPosition(x, y);
             pos++;
         }
     }

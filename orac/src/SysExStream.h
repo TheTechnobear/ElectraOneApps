@@ -57,7 +57,7 @@ public:
         return buf_[size_ - 1] == 0xF7;
     }
 
-    unsigned size() { return size_; }
+    unsigned size() const { return size_; }
 
     unsigned char *buffer() { return buf_; }
 
@@ -161,7 +161,7 @@ public:
     }
 
     float readFloat() {
-        float val = 0.0f;
+        float val;
         unsigned uval = 0;
         for (unsigned i = 0; i < 5; i++) {
             unsigned bit7 = read();

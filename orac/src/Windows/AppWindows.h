@@ -11,7 +11,7 @@
 
 class AppWindows : public Windows {
 public:
-    explicit AppWindows() {}
+    explicit AppWindows() = default;
 
     enum WindowType {
         MAIN,
@@ -31,7 +31,7 @@ public:
         }
     }
 
-    Window *getCurrentWindow(void) override {
+    Window *getCurrentWindow() override {
         if (idx_ < windows_.size()) {
             return windows_[idx_];
         }
@@ -39,14 +39,14 @@ public:
     }
 
 
-    OWindow* current() {
+    OWindow *current() {
         if (idx_ < windows_.size()) {
             return windows_[idx_];
         }
         return nullptr;
     }
 
-    void repaintCurrent(void) override {
+    void repaintCurrent() override {
         auto w = getCurrentWindow();
         if (w) w->repaint();
     }

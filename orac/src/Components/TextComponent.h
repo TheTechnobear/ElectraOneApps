@@ -8,9 +8,7 @@ public:
         *label = '\0';
     }
 
-    ~TextComponent() {
-
-    }
+    ~TextComponent() override = default;
 
     void setLabel(const char *newLabel) {
         if (strlen(newLabel) == 0) {
@@ -21,7 +19,7 @@ public:
         repaint();
     }
 
-    void paint(void) {
+    void paint() override {
         OComponent::paint();
         screen.printText(screenX, screenY, label, TextStyle::smallWhiteOnBlack,
                          width, TextAlign::center);

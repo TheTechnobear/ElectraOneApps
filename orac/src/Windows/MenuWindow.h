@@ -1,5 +1,7 @@
 #pragma once
 
+#include <utility>
+
 #include "OWindow.h"
 
 
@@ -21,12 +23,12 @@ public:
     struct MenuItem;
 
     struct MenuItem {
-        MenuItem(const std::string &n, MenuItem *p)
-            : name_(n), action_(nullptr), parent_(p) {
+        MenuItem(std::string n, MenuItem *p)
+            : name_(std::move(n)), action_(nullptr), parent_(p) {
         }
 
-        MenuItem(const std::string &n, std::function<void(void)> fn)
-            : name_(n), action_(fn), parent_(nullptr) {
+        MenuItem(std::string n, std::function<void(void)> fn)
+            : name_(std::move(n)), action_(std::move(fn)), parent_(nullptr) {
         }
 
         void addItem(const std::string &n, std::function<void(void)> fn) {
@@ -59,7 +61,7 @@ public:
         unsigned idx_ = 0;
     };
 
-    void paint(void) override {
+    void paint() override {
         screen.fillRect(screenX, screenY, width, height, COLOR_BLACK);
         Window::paint();
 

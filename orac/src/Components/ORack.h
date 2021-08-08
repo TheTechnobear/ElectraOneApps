@@ -6,18 +6,18 @@
 
 class OracRack : public OComponent {
 public:
-    OracRack(const Kontrol::Rack &r, OComponent *parent = nullptr) :
+    explicit OracRack(const Kontrol::Rack &r, OComponent *parent = nullptr) :
         OComponent(parent),
         rackId_(r.id()) {
         model_ = Kontrol::KontrolModel::model();
     }
 
-    ~OracRack() {}
+    ~OracRack() override = default;
 
 
     Kontrol::EntityId rackId() { return rackId_; }
 
-    void paint(void) override {
+    void paint() override {
         clearBackground();
         OComponent::paint();
 
@@ -28,7 +28,7 @@ public:
         }
     }
 
-    void onPotChange(int16_t relativeChange, handle_t handle = 0) override {
+    void onPotChange(int16_t relativeChange, handle_t handle) override {
         if (displayIdx_ < displayOrder_.size()) {
             auto id = displayOrder_[displayIdx_];
             if (modules_.count(id) > 0) {

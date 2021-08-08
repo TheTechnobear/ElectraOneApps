@@ -17,22 +17,22 @@ class OComponent : public Component {
 public:
     explicit OComponent(OComponent *parent = nullptr) :
         active_(false),
-        dimmed_(false) {
+        dimmed_(false),
+        parent_(parent) {
     }
 
-    ~OComponent() {
-    }
+    ~OComponent() override = default;
 
     std::function<bool(void)> onClick;
 
     // Component
     void setDimmed(bool d) override { dimmed_ = d; }
 
-    bool isDimmed(void) const override { return dimmed_; }
+    bool isDimmed() const override { return dimmed_; }
 
     void setActive(bool a) override { active_ = a; }
 
-    bool isActive(void) const override { return (active_); }
+    bool isActive() const override { return (active_); }
 
     void onPotTouchUp(handle_t handle) override {}
 
@@ -49,14 +49,14 @@ public:
     }
 
 
-    void assignToWindow(Window *window) {
+    void assignToWindow(Window *window) override {
         Component::assignToWindow(window);
         for (auto &c : children_) {
             c->assignToWindow(window);
         }
     }
 
-    void paint(void) override {
+    void paint() override {
         if (parent_ && !parent_->isVisible()) return;
 
         if (isVisible()) {
@@ -91,7 +91,7 @@ public:
     }
 
     // -------------------
-    void add(std::shared_ptr<OComponent> c) { children_.push_back(c); }
+    void add(const std::shared_ptr<OComponent> &c) { children_.push_back(c); }
 
     void clearBackground() {
         screen.fillRect(screenX, screenY, width, height, bgClr_);
