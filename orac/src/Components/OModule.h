@@ -60,8 +60,6 @@ public:
         }
     }
 
-    void visibilityChanged() override {}
-
     void addPage(const Kontrol::Rack &r, const Kontrol::Module &m, const Kontrol::Page &p) {
 
         if (r.id() != rackId_) { dbgMessage("ASSERT OracModule::addPage - invalid rack"); }
@@ -97,7 +95,7 @@ public:
 
             page->assignToWindow(getParentWindow());
             page->initParams();
-            reposition();
+            scrollView();
         } else {
 //            dbgMessage("existing Page %s %s", moduleId_.c_str(), p.id().c_str());
             //already exists
@@ -134,7 +132,7 @@ public:
             displayIdx_++;
             if ((displayIdx_ - displayOffset_) >= MAX_DISPLAY) {
                 displayOffset_ = displayIdx_ - (MAX_DISPLAY - 1);
-                reposition();
+                scrollView();
             } else {
                 getActivePage()->setActive(true);
                 repaint();
@@ -148,7 +146,7 @@ public:
             displayIdx_--;
             if ((displayIdx_ - displayOffset_) >= MAX_DISPLAY) {
                 displayOffset_ = displayIdx_;
-                reposition();
+                scrollView();
             } else {
                 getActivePage()->setActive(true);
                 repaint();
@@ -157,14 +155,38 @@ public:
     }
 
 
-    void reposition() {
+    void scrollView() {
         unsigned idx = 0;
 //        unsigned h = height - 20;
         unsigned w = (width - 60) / MAX_DISPLAY;
         for (auto id: displayOrder_) {
-            bool vis = isVisible()
-                       && (idx >= displayOffset_ && (idx < displayOffset_ + MAX_DISPLAY));
+            bool vis = isVisible() && (idx >= displayOffset_ && (idx < displayOffset_ + MAX_DISPLAY));
             bool act = vis && (idx == displayIdx_);
+            if (pages_.count(id) > 0) {
+                auto page = pages_[id];
+                page->setVisible(vis);
+                page->setDimmed(!act);
+                page->setActive(act);
+                if (vis) {
+                    unsigned x = screenX + 50 + ((idx - displayOffset_) * w);
+                    unsigned y = screenY + 10;
+                    page->setPosition(x, y);
+                }
+
+//                page->reposition();// TODO: resized?
+            }
+            idx++;
+        }
+        repaint();
+    }
+
+    void moved() override {
+//        OComponent::moved();
+        unsigned idx = 0;
+//        unsigned h = height - 20;
+        unsigned w = (width - 60) / MAX_DISPLAY;
+        for (auto id: displayOrder_) {
+            bool vis = isVisible() && (idx >= displayOffset_ && (idx < displayOffset_ + MAX_DISPLAY));
             if (pages_.count(id) > 0) {
                 auto page = pages_[id];
                 if (vis) {
@@ -172,17 +194,31 @@ public:
                     unsigned y = screenY + 10;
                     page->setPosition(x, y);
                 }
-                page->setVisible(vis);
-                page->setDimmed(!act);
-                page->setActive(act);
-
-                page->reposition();// TODO: resized?
             }
             idx++;
         }
         repaint();
     }
 
+    void resized() override {
+        OComponent::resized();
+    }
+
+    void visibilityChanged() override {
+//        OComponent::visibilityChanged();
+        unsigned idx = 0;
+//        unsigned h = height - 20;
+        unsigned w = (width - 60) / MAX_DISPLAY;
+        for (auto id: displayOrder_) {
+            bool vis = isVisible() && (idx >= displayOffset_ && (idx < displayOffset_ + MAX_DISPLAY));
+            if (pages_.count(id) > 0) {
+                auto page = pages_[id];
+                page->setVisible(vis);
+            }
+            idx++;
+        }
+        repaint();
+    }
 
 private:
 

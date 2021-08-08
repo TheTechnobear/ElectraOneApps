@@ -15,7 +15,7 @@ public:
     ~OracRack() {}
 
 
-    Kontrol::EntityId rackId() { return rackId_;}
+    Kontrol::EntityId rackId() { return rackId_; }
 
     void paint(void) override {
         clearBackground();
@@ -38,9 +38,6 @@ public:
         }
     }
 
-    void visibilityChanged() override {
-//        dbgMessage("rack visibilityChanged %d", isVisible());
-    }
 
     void addModule(const Kontrol::Rack &r, const Kontrol::Module &m) {
         if (r.id() != rackId_) { dbgMessage("ASSERT OracRack::addModule"); }
@@ -63,11 +60,11 @@ public:
             add(module);
             module->assignToWindow(getParentWindow());
 
-            reposition();
+            scrollView();
         } else {
             //already exists
 //            dbgMessage("existing module %s %s", rackId_.c_str(), m.id().c_str());
-            auto module= modules_[m.id()];
+            auto module = modules_[m.id()];
             // module needs to be reset, so parameters and pages change
             module->reset();
         }
@@ -99,7 +96,7 @@ public:
             displayIdx_++;
             if ((displayIdx_ - displayOffset_) >= MAX_DISPLAY) {
                 displayOffset_ = displayIdx_ - (MAX_DISPLAY - 1);
-                reposition();
+                scrollView();
             } else {
                 getActiveModule()->setActive(true);
                 repaint();
@@ -113,7 +110,7 @@ public:
             displayIdx_--;
             if ((displayIdx_ - displayOffset_) >= MAX_DISPLAY) {
                 displayOffset_ = displayIdx_;
-                reposition();
+                scrollView();
             } else {
                 getActiveModule()->setActive(true);
                 repaint();
@@ -121,14 +118,37 @@ public:
         }
     }
 
-    void reposition() {
+    void scrollView() {
         unsigned idx = 0;
         unsigned h = ((height - 4) / MAX_DISPLAY) - 4;
 //        unsigned w = width - 4;
         for (auto id: displayOrder_) {
-            bool vis = isVisible()
-                       && (idx >= displayOffset_ && (idx < displayOffset_ + MAX_DISPLAY));
+            bool vis = isVisible() && (idx >= displayOffset_ && (idx < displayOffset_ + MAX_DISPLAY));
             bool act = vis && (idx == displayIdx_);
+            if (modules_.count(id) > 0) {
+                auto module = modules_[id];
+                module->setVisible(vis);
+                module->setDimmed(!act);
+                module->setActive(act);
+                if (vis) {
+                    unsigned x = screenX + 5;
+                    unsigned y = screenY + 5 + ((idx - displayOffset_) * h);
+                    module->setPosition(x, y);
+                }
+            }
+            idx++;
+        }
+        repaint();
+    }
+
+    // rack doesnt get moved/resized
+    void moved() override {
+//        OComponent::moved();
+        unsigned idx = 0;
+        unsigned h = ((height - 4) / MAX_DISPLAY) - 4;
+//        unsigned w = width - 4;
+        for (auto id: displayOrder_) {
+            bool vis = isVisible() && (idx >= displayOffset_ && (idx < displayOffset_ + MAX_DISPLAY));
             if (modules_.count(id) > 0) {
                 auto module = modules_[id];
                 if (vis) {
@@ -136,15 +156,30 @@ public:
                     unsigned y = screenY + 5 + ((idx - displayOffset_) * h);
                     module->setPosition(x, y);
                 }
-                module->setVisible(vis);
-                module->setDimmed(!act);
-                module->setActive(act);
-                module->reposition(); // TODO: resized?
             }
             idx++;
         }
         repaint();
     }
+
+    void resized() override {
+        OComponent::resized();
+    }
+
+    void visibilityChanged() override {
+//        OComponent::visibilityChanged();
+        unsigned idx = 0;
+        for (auto id: displayOrder_) {
+            bool vis = isVisible() && (idx >= displayOffset_ && (idx < displayOffset_ + MAX_DISPLAY));
+            if (modules_.count(id) > 0) {
+                auto module = modules_[id];
+                module->setVisible(vis);
+            }
+            idx++;
+        }
+        repaint();
+    }
+
 
 private:
     Kontrol::EntityId rackId_;

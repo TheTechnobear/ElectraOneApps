@@ -49,7 +49,8 @@ public:
             pos++;
         }
 
-        reposition();
+        //TODO check me
+        moved(); // position params
     }
 
     void paint(void) {
@@ -88,11 +89,9 @@ public:
         }
     }
 
-
-    void reposition() {
-        // reposition ctrls, due to this page being moved
+    void moved() override {
+//        OComponent::moved();
         bool vis = isVisible();
-        bool act = vis && isActive();
 
         unsigned w = (width - 25) / 2;
         unsigned h = (height - 30) / 2;
@@ -104,6 +103,21 @@ public:
                 unsigned y = screenY + 20 + ((pos / 2) * (h + 5));
                 ctrl->setPosition(x, y);
             }
+            pos++;
+        }
+    }
+
+    void resized() override {
+        OComponent::resized();
+    }
+
+    void visibilityChanged() override {
+//        OComponent::visibilityChanged();
+        bool vis = isVisible();
+        bool act = vis && isActive();
+
+        int pos = 0;
+        for (auto ctrl : params_) {
             ctrl->setVisible(vis);
             ctrl->setDimmed(!act);
             ctrl->setActive(act);

@@ -94,6 +94,12 @@ public:
         }
     }
 
+    void visibilityChanged() override {
+        if (getActiveRack()) {
+            getActiveRack()->setVisible(isVisible());
+        }
+    }
+
 private:
     std::map<Kontrol::EntityId, std::shared_ptr<OracRack>> racks_;
 };

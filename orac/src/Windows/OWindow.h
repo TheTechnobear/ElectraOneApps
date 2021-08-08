@@ -45,15 +45,12 @@ public:
     void buttonLongHold(uint8_t buttonId) override {};
 
     // Graphics
-//    void visibilityChanged() override {
-//        // nasty ;)
-//        bool vis = isVisible();
-//        for(auto components : getComponents()) {
-//            components->setVisible(vis);
-//        }
-//
-//    }
-
+    void visibilityChanged() override {
+        bool vis = isVisible();
+        for (auto components : getComponents()) {
+            components->setVisible(vis);
+        }
+    }
 
 protected:
     ~OWindow() {}

@@ -68,16 +68,25 @@ public:
     }
 
     void visibilityChanged() override {
-        bool v = isVisible() && (parent_ == nullptr && parent_->isVisible());
+        Component::visibilityChanged();
 
+        bool v = isVisible() && (parent_ == nullptr && parent_->isVisible());
         for (auto &c : children_) {
             c->setVisible(v);
         }
     }
 
     void resized() override {
+        Component::resized();
         for (auto &c : children_) {
             c->resized();
+        }
+    }
+
+    void moved() override {
+        Component::moved();
+        for (auto &c : children_) {
+            c->moved();
         }
     }
 
@@ -96,14 +105,6 @@ public:
     void setFgColour(uint16_t clr) { fgClr_ = clr; }
 
     void setBgColour(uint16_t clr) { bgClr_ = clr; }
-
-    void setPosition(unsigned newX, unsigned newY) {
-        setBounds(newX, newY, width, height);
-    }
-
-    void setSize(unsigned newW, unsigned newH) {
-        setBounds(screenX, screenY, newW, newH);
-    }
 
 protected:
     uint16_t bgClr_ = 0x0000;
