@@ -19,6 +19,7 @@ public:
 
     void paint(void) override;
 
+    void buttonUp(uint8_t buttonId) override;
     static DebugWindow *debugWindow();
 };
 

@@ -14,18 +14,19 @@ public:
         OWindow(newX, newY, newWidth, newHeight,
                 newPinOptionAvailable, newWindowPinned) {
         doNotUseControlSets();
-        menu_ = std::make_shared<MenuItem>("Main");
+        topMenu_ = std::make_shared<MenuItem>("Main", nullptr);
+        curMenu_ = topMenu_.get();
     }
 
     struct MenuItem;
 
     struct MenuItem {
-        MenuItem(const std::string &n)
-            : name_(n), action_(nullptr) {
+        MenuItem(const std::string &n, MenuItem *p)
+            : name_(n), action_(nullptr), parent_(p) {
         }
 
         MenuItem(const std::string &n, std::function<void(void)> fn)
-            : name_(n), action_(fn) {
+            : name_(n), action_(fn), parent_(nullptr) {
         }
 
         void addItem(const std::string &n, std::function<void(void)> fn) {
@@ -34,41 +35,27 @@ public:
         }
 
         std::shared_ptr<MenuItem> addMenu(const std::string &n) {
-            auto i = std::make_shared<MenuItem>(n);
+            auto i = std::make_shared<MenuItem>(n, this);
             items_.push_back(i);
             return i;
         }
 
-        void next() {
-            if (idx_ < (items_.size() - 1)) {
-                idx_++;
-            }
-        }
 
-        void prev() {
-            if (idx_ > 0) {
-                idx_--;
-            }
-        }
-
-        void select() {
-            if (idx_ >= 0 && idx_ < items_.size()) {
-                auto i = items_[idx_];
-                if (i->action_) {
-                    i->action_();
+        std::shared_ptr<MenuItem> find(const std::string &n) {
+            for (auto i : items_) {
+                if (i->name_ == n) {
+                    return i;
                 }
             }
-        }
-
-        void back() {
-            if (items_.size()) {
-            }
+            return nullptr;
         }
 
         std::string name_;
         std::function<void(void)> action_;
         std::vector<std::shared_ptr<MenuItem>> items_;
 
+        MenuItem *parent_;
+        unsigned offset_ = 0;
         unsigned idx_ = 0;
     };
 
@@ -76,43 +63,69 @@ public:
         screen.fillRect(screenX, screenY, width, height, COLOR_BLACK);
         Window::paint();
 
-        paintMenu(menu_.get());
+        paintMenu(curMenu_);
     }
 
     void paintMenu(MenuItem *m) {
         unsigned x = screenX + 40;
         unsigned y = screenY + 40;
 
-        unsigned idx = 0;
-
-        for (auto i: m->items_) {
+        unsigned last = (m->offset_ + MAX_DISPLAY) > m->items_.size() ? m->items_.size() : m->offset_ + MAX_DISPLAY;
+        for (unsigned idx = m->offset_; idx < last; idx++) {
+            auto i = m->items_[idx];
             if (idx == m->idx_) {
                 screen.printText(x, y, i->name_.c_str(), TextStyle::mediumBlackOnWhite, 200, TextAlign::left);
             } else {
                 screen.printText(x, y, i->name_.c_str(), TextStyle::mediumWhiteOnBlack, 200, TextAlign::left);
             }
             y += 30;
-            idx++;
         }
     }
 
-    std::shared_ptr<MenuItem> getMenu() { return menu_; }
+    std::shared_ptr<MenuItem> getMenu() { return topMenu_; }
 
     void buttonUp(uint8_t buttonId) override {
         switch (buttonId) {
-            case BUTTON_LEFT_TOP : {
-                menu_->prev();
-                repaint();
+            case BUTTON_LEFT_TOP : { // prev
+                if (curMenu_->idx_ > 0) {
+                    curMenu_->idx_--;
+                    if ((curMenu_->idx_ - curMenu_->offset_) >= MAX_DISPLAY) {
+                        curMenu_->offset_ = curMenu_->idx_;
+                    }
+                    repaint();
+                }
                 break;
             }
-            case BUTTON_LEFT_MIDDLE : {
-                menu_->next();
-                repaint();
+            case BUTTON_LEFT_MIDDLE : { // next
+                if (curMenu_->idx_ < (curMenu_->items_.size() - 1)) {
+                    curMenu_->idx_++;
+                    if ((curMenu_->idx_ - curMenu_->offset_) >= MAX_DISPLAY) {
+                        curMenu_->offset_ = curMenu_->idx_ - (MAX_DISPLAY - 1);
+                    }
+
+                    repaint();
+                }
                 break;
             }
-            case BUTTON_LEFT_BOTTOM : {
-                menu_->select();
-                repaint();
+            case BUTTON_RIGHT_TOP : { // select
+                if (curMenu_->idx_ >= 0 && curMenu_->idx_ < curMenu_->items_.size()) {
+                    auto i = curMenu_->items_[curMenu_->idx_];
+                    if (i->action_) {
+                        i->action_();
+                    } else {
+                        if (!i->items_.empty()) {
+                            curMenu_ = i.get();
+                        }
+                    }
+                    repaint();
+                }
+                break;
+            }
+            case BUTTON_RIGHT_MIDDLE : { //back
+                if (curMenu_->parent_) {
+                    curMenu_ = curMenu_->parent_;
+                    repaint();
+                }
                 break;
             }
             default: {
@@ -122,8 +135,18 @@ public:
         }
     }
 
+    void clearMenu(std::shared_ptr<MenuItem> &item) {
+        // reset to top menu
+        curMenu_ = topMenu_.get();
+        topMenu_->idx_ = 0;
+        topMenu_->offset_ = 0;
+
+        // clear given menu
+        item->items_.clear();
+    }
+
 private:
-
-
-    std::shared_ptr<MenuItem> menu_;
+    static constexpr unsigned MAX_DISPLAY = 15;
+    std::shared_ptr<MenuItem> topMenu_;
+    MenuItem *curMenu_;
 };

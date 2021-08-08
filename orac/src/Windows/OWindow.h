@@ -4,6 +4,8 @@
 
 #include "../IUICallback.h"
 
+#include "../Debug.h"
+
 class OWindow : public Window, public IUICallback {
 public:
     explicit OWindow(uint16_t newX = 0,
@@ -17,6 +19,7 @@ public:
         doNotUseControlSets();
     }
 
+    //IUICallback
     void touchDown(TouchEvent &touchEvent) override {}
 
     void touchUp(TouchEvent &touchEvent) override {}
@@ -40,6 +43,16 @@ public:
     void buttonDown(uint8_t buttonId) override {}
 
     void buttonLongHold(uint8_t buttonId) override {};
+
+    // Graphics
+//    void visibilityChanged() override {
+//        // nasty ;)
+//        bool vis = isVisible();
+//        for(auto components : getComponents()) {
+//            components->setVisible(vis);
+//        }
+//
+//    }
 
 
 protected:

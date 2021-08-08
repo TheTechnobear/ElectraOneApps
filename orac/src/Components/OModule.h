@@ -17,6 +17,10 @@ public:
 
     ~OracModule() {}
 
+    Kontrol::EntityId rackId() { return rackId_; }
+
+    Kontrol::EntityId moduleId() { return moduleId_; }
+
     void paint(void) {
         clearBackground();
         OComponent::paint();
@@ -28,10 +32,10 @@ public:
         if (rack && module) {
             screen.printText(screenX + 10, screenY + 10, module->id().c_str(), TextStyle::smallWhiteOnBlack, width, TextAlign::left);
 
-            if(module->displayName().length()<6) {
+            if (module->displayName().length() < 6) {
                 screen.printText(screenX + 10, screenY + 50, module->displayName().c_str(), TextStyle::smallWhiteOnBlack, width, TextAlign::left);
             } else {
-                std::string s1 = module->displayName().substr(0,5);
+                std::string s1 = module->displayName().substr(0, 5);
                 std::string s2 = module->displayName().substr(5);
                 screen.printText(screenX + 10, screenY + 50, s1.c_str(), TextStyle::smallWhiteOnBlack, width, TextAlign::left);
                 screen.printText(screenX + 10, screenY + 70, s2.c_str(), TextStyle::smallWhiteOnBlack, width, TextAlign::left);
@@ -70,6 +74,7 @@ public:
         //                      rgbToRgb565(0x0, 0x0, 0xF)};
 
         if (pages_.count(p.id()) == 0) {
+//            dbgMessage("addPage %s %s", moduleId_.c_str(), p.id().c_str());
             auto page = std::make_shared<OracPage>(r, m, p, this);
             pages_[p.id()] = page;
 
@@ -94,6 +99,7 @@ public:
             page->initParams();
             reposition();
         } else {
+//            dbgMessage("existing Page %s %s", moduleId_.c_str(), p.id().c_str());
             //already exists
 //            auto page = pages_[p.id()];
 //            if (page->isVisible()) {
@@ -101,6 +107,14 @@ public:
 //            }
 //            repaint();
         }
+    }
+
+    void reset() {
+//        dbgMessage("reset %s", moduleId_.c_str());
+        pages_.clear();
+        displayOrder_.clear();
+        displayIdx_ = 0;
+        displayOffset_ = 0;
     }
 
 

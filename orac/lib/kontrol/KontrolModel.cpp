@@ -385,46 +385,46 @@ void KontrolModel::unassignModulation(ChangeSource src,
 
 
 
-// void KontrolModel::savePreset(ChangeSource src, const EntityId &rackId, std::string preset) {
-//     auto rack = getRack(rackId);
-//     if (rack == nullptr) return;
+ void KontrolModel::savePreset(ChangeSource src, const EntityId &rackId, std::string preset) {
+     auto rack = getRack(rackId);
+     if (rack == nullptr) return;
 
-//     if (src.type()==ChangeSource::REMOTE && localRack() && rackId == localRack()->id()) {
+     if (src.type()==ChangeSource::REMOTE && localRack() && rackId == localRack()->id()) {
 //         localRack()->savePreset(preset);
-//     } else {
-//         rack->currentPreset(preset);
-//     }
+     } else {
+         rack->currentPreset(preset);
+     }
 
-//     for (const auto &i : listeners_) {
-//         (i.second)->savePreset(src, *rack, preset);
-//     }
-// }
+     for (const auto &i : listeners_) {
+         (i.second)->savePreset(src, *rack, preset);
+     }
+ }
 
-// void KontrolModel::loadPreset(ChangeSource src, const EntityId &rackId, std::string preset) {
-//     auto rack = getRack(rackId);
-//     if (rack == nullptr) return;
-//     if (src.type()==ChangeSource::REMOTE  && localRack() && rackId == localRack()->id()) {
+ void KontrolModel::loadPreset(ChangeSource src, const EntityId &rackId, std::string preset) {
+     auto rack = getRack(rackId);
+     if (rack == nullptr) return;
+     if (src.type()==ChangeSource::REMOTE  && localRack() && rackId == localRack()->id()) {
 //         localRack()->loadPreset(preset);
-//     } else {
-//         rack->currentPreset(preset);
-//     }
+     } else {
+         rack->currentPreset(preset);
+     }
 
-//     for (const auto &i : listeners_) {
-//         (i.second)->loadPreset(src, *rack, preset);
-//     }
-// }
+     for (const auto &i : listeners_) {
+         (i.second)->loadPreset(src, *rack, preset);
+     }
+ }
 
-// void KontrolModel::saveSettings(ChangeSource src, const EntityId &rackId) {
-//     if (src.type()==ChangeSource::REMOTE  && localRack() && rackId == localRack()->id()) {
+ void KontrolModel::saveSettings(ChangeSource src, const EntityId &rackId) {
+     if (src.type()==ChangeSource::REMOTE  && localRack() && rackId == localRack()->id()) {
 //         localRack()->saveSettings();
-//     }
+     }
 
-//     auto rack = getRack(rackId);
-//     if (rack == nullptr) return;
-//     for (const auto &i : listeners_) {
-//         (i.second)->saveSettings(src, *rack);
-//     }
-// }
+     auto rack = getRack(rackId);
+     if (rack == nullptr) return;
+     for (const auto &i : listeners_) {
+         (i.second)->saveSettings(src, *rack);
+     }
+ }
 
 void KontrolModel::ping(
         ChangeSource src,

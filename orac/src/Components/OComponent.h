@@ -57,6 +57,8 @@ public:
     }
 
     void paint(void) override {
+        if (parent_ && !parent_->isVisible()) return;
+
         if (isVisible()) {
             for (auto &c : children_) {
 //                if (c->isVisible()) c->repaint();
@@ -66,7 +68,8 @@ public:
     }
 
     void visibilityChanged() override {
-        bool v = isVisible();
+        bool v = isVisible() && (parent_ == nullptr && parent_->isVisible());
+
         for (auto &c : children_) {
             c->setVisible(v);
         }

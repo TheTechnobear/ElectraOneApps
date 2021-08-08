@@ -33,10 +33,11 @@ public:
                 unsigned header = 40; // status bar = 15
 
                 rack->setBounds(screenX, screenY + header, width, height - header);
-                addAndMakeVisible(rack.get());
+                addComponent(rack.get());
                 for (unsigned enc = 0; enc < 12; enc++) {
                     assignPot(enc, 0, rack.get(), enc);
                 }
+                rack->setVisible(isVisible());
                 rack->repaint();
             }
         }

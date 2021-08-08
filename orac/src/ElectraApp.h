@@ -60,10 +60,25 @@ public:
 
     MainWindow &mainWindow() { return mainWindow_; }
 
+
+    void publishStart();
+    void publishEnd();
+
+    // update menus
+    void addPreset(const std::string &preset);
+    void addModule(const std::string &module);
+
+
     // menu items
-    void menuNew(void);
+    void presetNew(void);
+    void presetSave(void);
+    void modLearn(void);
+    void midiLearn(void);
+    void patchSave(void);
 
 
+    void moduleSelect(void);
+    void presetSelect(void);
 private:
     friend class E1KontrolCallback;
 
@@ -85,5 +100,7 @@ private:
     MenuWindow menuWindow_;
     DebugWindow debugWindow_;
     AppWindows windows_;
+    std::shared_ptr<MenuWindow::MenuItem> moduleMenuItems_;
+    std::shared_ptr<MenuWindow::MenuItem> presetMenuItems_;
     MidiBase midi_;
 };

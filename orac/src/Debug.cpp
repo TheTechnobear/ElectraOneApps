@@ -2,6 +2,8 @@
 #include <stdarg.h>
 #include <stdio.h>
 
+#include <Buttons.h>
+
 //logMessage
 #include <helpers.h>
 
@@ -12,9 +14,7 @@ static DebugWindow debugWindow_;
 
 struct dbgRingBuffer {
     dbgRingBuffer() {
-        for (unsigned i = 0; i < MAX_MSGS; i++) {
-            buffer_[i][0] = 0;
-        }
+        reset();
     }
 
     char *getReadPos() {
@@ -38,6 +38,14 @@ struct dbgRingBuffer {
     unsigned n() {
         if (wrPos_ < rdPos_) { return (wrPos_ + MAX_MSGS) - rdPos_; }
         return wrPos_ - rdPos_;
+    }
+
+    void reset() {
+        for (unsigned i = 0; i < MAX_MSGS; i++) {
+            buffer_[i][0] = 0;
+        }
+        wrPos_ = 0;
+        rdPos_ = 0;
     }
 
     friend class DebugWindow;
@@ -68,6 +76,15 @@ void DebugWindow::paint(void) {
     }
 }
 
+void DebugWindow::buttonUp(uint8_t buttonId)  {
+    switch (buttonId) {
+        case BUTTON_LEFT_TOP : {
+            dbgBuf_.reset();
+            repaint();
+            break;
+        }
+    }
+}
 
 void dbgMessage(const char *format, ...) {
     char *buf = dbgBuf_.getWritePos();

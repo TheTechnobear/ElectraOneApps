@@ -14,7 +14,10 @@ public:
 
     ~OracRack() {}
 
-    void paint(void) {
+
+    Kontrol::EntityId rackId() { return rackId_;}
+
+    void paint(void) override {
         clearBackground();
         OComponent::paint();
 
@@ -35,12 +38,15 @@ public:
         }
     }
 
-    void visibilityChanged() override {}
+    void visibilityChanged() override {
+//        dbgMessage("rack visibilityChanged %d", isVisible());
+    }
 
     void addModule(const Kontrol::Rack &r, const Kontrol::Module &m) {
         if (r.id() != rackId_) { dbgMessage("ASSERT OracRack::addModule"); }
 
         if (modules_.count(m.id()) == 0) {
+//            dbgMessage("add module %s %s", rackId_.c_str(), m.id().c_str());
             auto module = std::make_shared<OracModule>(r, m, this);
             modules_[m.id()] = module;
             displayOrder_.push_back(m.id());
@@ -60,6 +66,10 @@ public:
             reposition();
         } else {
             //already exists
+//            dbgMessage("existing module %s %s", rackId_.c_str(), m.id().c_str());
+            auto module= modules_[m.id()];
+            // module needs to be reset, so parameters and pages change
+            module->reset();
         }
     }
 
