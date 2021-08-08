@@ -119,15 +119,16 @@ public:
     }
 
     void scrollView() {
+        // TODO : use moved/visibility changed?
         unsigned idx = 0;
         unsigned h = ((height - 4) / MAX_DISPLAY) - 4;
 //        unsigned w = width - 4;
         for (auto id: displayOrder_) {
-            bool vis = isVisible() && (idx >= displayOffset_ && (idx < displayOffset_ + MAX_DISPLAY));
+            bool vis = idx >= displayOffset_ && (idx < displayOffset_ + MAX_DISPLAY);
             bool act = vis && (idx == displayIdx_);
             if (modules_.count(id) > 0) {
                 auto module = modules_[id];
-                module->setVisible(vis);
+                module->setVisible(isVisible() && vis);
                 module->setDimmed(!act);
                 module->setActive(act);
                 if (vis) {
@@ -148,7 +149,7 @@ public:
         unsigned h = ((height - 4) / MAX_DISPLAY) - 4;
 //        unsigned w = width - 4;
         for (auto id: displayOrder_) {
-            bool vis = isVisible() && (idx >= displayOffset_ && (idx < displayOffset_ + MAX_DISPLAY));
+            bool vis = idx >= displayOffset_ && (idx < displayOffset_ + MAX_DISPLAY);
             if (modules_.count(id) > 0) {
                 auto module = modules_[id];
                 if (vis) {
@@ -170,10 +171,10 @@ public:
 //        OComponent::visibilityChanged();
         unsigned idx = 0;
         for (auto id: displayOrder_) {
-            bool vis = isVisible() && (idx >= displayOffset_ && (idx < displayOffset_ + MAX_DISPLAY));
+            bool vis = idx >= displayOffset_ && (idx < displayOffset_ + MAX_DISPLAY);
             if (modules_.count(id) > 0) {
                 auto module = modules_[id];
-                module->setVisible(vis);
+                module->setVisible(isVisible() && vis);
             }
             idx++;
         }

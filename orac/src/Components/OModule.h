@@ -15,13 +15,13 @@ public:
         model_ = Kontrol::KontrolModel::model();
     }
 
-    ~OracModule() {}
+    ~OracModule() override = default;
 
     Kontrol::EntityId rackId() { return rackId_; }
 
     Kontrol::EntityId moduleId() { return moduleId_; }
 
-    void paint(void) {
+    void paint() override {
         clearBackground();
         OComponent::paint();
 
@@ -44,7 +44,7 @@ public:
         }
     }
 
-    void onPotChange(int16_t relativeChange, handle_t handle = 0) override {
+    void onPotChange(int16_t relativeChange, handle_t handle) override {
         if (isVisible() && isActive()) {
             unsigned pageN = ((handle % 6) / 2) + displayOffset_;
             if (pageN < displayOrder_.size()) {
@@ -95,6 +95,7 @@ public:
 
             page->assignToWindow(getParentWindow());
             page->initParams();
+            // TODO : use moved/visibility changed?
             scrollView();
         } else {
 //            dbgMessage("existing Page %s %s", moduleId_.c_str(), p.id().c_str());
@@ -156,15 +157,16 @@ public:
 
 
     void scrollView() {
+        // TODO : use moved/visibility changed?
         unsigned idx = 0;
 //        unsigned h = height - 20;
         unsigned w = (width - 60) / MAX_DISPLAY;
         for (auto id: displayOrder_) {
-            bool vis = isVisible() && (idx >= displayOffset_ && (idx < displayOffset_ + MAX_DISPLAY));
+            bool vis = idx >= displayOffset_ && (idx < displayOffset_ + MAX_DISPLAY);
             bool act = vis && (idx == displayIdx_);
             if (pages_.count(id) > 0) {
                 auto page = pages_[id];
-                page->setVisible(vis);
+                page->setVisible(isVisible() && vis);
                 page->setDimmed(!act);
                 page->setActive(act);
                 if (vis) {
@@ -172,8 +174,6 @@ public:
                     unsigned y = screenY + 10;
                     page->setPosition(x, y);
                 }
-
-//                page->reposition();// TODO: resized?
             }
             idx++;
         }
@@ -186,7 +186,7 @@ public:
 //        unsigned h = height - 20;
         unsigned w = (width - 60) / MAX_DISPLAY;
         for (auto id: displayOrder_) {
-            bool vis = isVisible() && (idx >= displayOffset_ && (idx < displayOffset_ + MAX_DISPLAY));
+            bool vis = idx >= displayOffset_ && (idx < displayOffset_ + MAX_DISPLAY);
             if (pages_.count(id) > 0) {
                 auto page = pages_[id];
                 if (vis) {
@@ -210,10 +210,10 @@ public:
 //        unsigned h = height - 20;
         unsigned w = (width - 60) / MAX_DISPLAY;
         for (auto id: displayOrder_) {
-            bool vis = isVisible() && (idx >= displayOffset_ && (idx < displayOffset_ + MAX_DISPLAY));
+            bool vis = idx >= displayOffset_ && (idx < displayOffset_ + MAX_DISPLAY);
             if (pages_.count(id) > 0) {
                 auto page = pages_[id];
-                page->setVisible(vis);
+                page->setVisible(isVisible() && vis);
             }
             idx++;
         }
@@ -222,13 +222,13 @@ public:
 
 private:
 
-    Kontrol::EntityId rackId_;
-    Kontrol::EntityId moduleId_;
+    Kontrol::EntityId rackId_{};
+    Kontrol::EntityId moduleId_{};
 
     static constexpr unsigned MAX_DISPLAY = 3;
     unsigned displayOffset_ = 0, displayIdx_ = 0;
-    std::vector<Kontrol::EntityId> displayOrder_;
+    std::vector<Kontrol::EntityId> displayOrder_{};
 
-    std::shared_ptr<Kontrol::KontrolModel> model_;
+    std::shared_ptr<Kontrol::KontrolModel> model_{};
     std::map<Kontrol::EntityId, std::shared_ptr<OracPage>> pages_;
 };

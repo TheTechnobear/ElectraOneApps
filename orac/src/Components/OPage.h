@@ -49,8 +49,8 @@ public:
             pos++;
         }
 
-        //TODO check me
-        moved(); // position params
+        moved();
+        visibilityChanged();
     }
 
     void paint(void) {
@@ -91,18 +91,18 @@ public:
 
     void moved() override {
 //        OComponent::moved();
-        bool vis = isVisible();
+//        bool vis = isVisible();
 
         unsigned w = (width - 25) / 2;
         unsigned h = (height - 30) / 2;
 
         int pos = 0;
         for (auto ctrl : params_) {
-            if (vis) {
+//            if (vis) {
                 unsigned x = screenX + 5 + ((pos % 2) * (w + 5));
                 unsigned y = screenY + 20 + ((pos / 2) * (h + 5));
                 ctrl->setPosition(x, y);
-            }
+//            }
             pos++;
         }
     }
