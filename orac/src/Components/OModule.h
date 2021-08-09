@@ -202,7 +202,7 @@ public:
 //        OComponent::visibilityChanged();
         unsigned idx = 0;
 //        unsigned h = height - 20;
-        unsigned w = (width - 60) / MAX_DISPLAY;
+//        unsigned w = (width - 60) / MAX_DISPLAY;
         for (auto id: displayOrder_) {
             bool vis = idx >= displayOffset_ && (idx < displayOffset_ + MAX_DISPLAY);
             if (pages_.count(id) > 0) {

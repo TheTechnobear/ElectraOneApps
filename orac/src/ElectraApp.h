@@ -70,15 +70,24 @@ public:
 
 
     // menu items
-    void presetNew();
-    void presetSave();
-    void modLearn();
-    void midiLearn();
-    void patchSave();
+    void menuPresetNew();
+    void menuPresetSave();
+    void menuModLearn();
+    void menuMidiLearn();
+    void menuSaveSettings();
+
+    void menuModuleSelect();
+    void menuPresetSelect();
 
 
-    void moduleSelect();
-    void presetSelect();
+    void midiLearn(bool b);
+
+    bool midiLearn() { return midiLearnActive_; }
+
+    void modulationLearn(bool b);
+
+    bool modulationLearn() { return modulationLearnActive_; }
+
 private:
     friend class E1KontrolCallback;
 
@@ -93,8 +102,8 @@ private:
     std::unordered_map<unsigned, std::string> tokenToString_;
     std::map<std::string, unsigned> strToToken_;
 
-    friend class E1KontrolCallback;
-
+    bool midiLearnActive_ = false;
+    bool modulationLearnActive_ = false;
 
     MainWindow mainWindow_;
     MenuWindow menuWindow_;

@@ -50,6 +50,7 @@ public:
 
     void param(Kontrol::ChangeSource, const Kontrol::Rack &,
                const Kontrol::Module &, const Kontrol::Parameter &) override {
+        // TODO : check, do I need param handling?
     }
 
     void changed(Kontrol::ChangeSource src, const Kontrol::Rack &rack,
@@ -99,6 +100,10 @@ public:
         }
     }
 
+    void deleteRack(Kontrol::ChangeSource, const Kontrol::Rack &) override {
+        // not using but pure virtual
+    }
+
     void resource(Kontrol::ChangeSource src, const Kontrol::Rack &,
                   const std::string &t, const std::string &v) override {
         if (src != Kontrol::CS_LOCAL) {
@@ -110,13 +115,8 @@ public:
         }
     }
 
-    void deleteRack(Kontrol::ChangeSource, const Kontrol::Rack &) override {}
-
-    // void activeModule(ChangeSource, const Rack &, const Module &) { ; }
-
     void loadModule(Kontrol::ChangeSource src, const Kontrol::Rack &rack, const Kontrol::EntityId &modId, const std::string &modType) override {
-        if (src != Kontrol::CS_LOCAL) {
-        } else {
+        if (src == Kontrol::CS_LOCAL) {
             auto &sysex = sysExOutStream_;
             sysex.begin();
 
@@ -127,37 +127,38 @@ public:
 
             sysex.end();
             send(sysex);
+//        } else {
         }
     }
 
-    // void ping(ChangeSource src, const std::string &host, unsigned port,
-    // unsigned keepAlive) { ; }
-
-    // void assignMidiCC(ChangeSource, const Rack &, const Module &, const
-    // Parameter &, unsigned midiCC) { ; }
-    //
-    // void unassignMidiCC(ChangeSource, const
-    // Rack &, const Module &, const Parameter &, unsigned midiCC) { ; }
-
-    // void assignModulation(ChangeSource, const Rack &, const Module &, const
-    // Parameter &, unsigned bus) { ; }
-    //
-    // void unassignModulation(ChangeSource,
-    // const Rack &, const Module &, const Parameter &, unsigned bus) { ; }
-
-    void publishStart(Kontrol::ChangeSource, unsigned numRacks) override {
-        app_->publishStart();
+    void publishStart(Kontrol::ChangeSource src, unsigned numRacks) override {
+        if (src != Kontrol::CS_LOCAL) {
+            app_->publishStart();
+        }
     }
 
-    void publishRackFinished(Kontrol::ChangeSource, const Kontrol::Rack &) override {
-        app_->publishEnd();
+    void publishRackFinished(Kontrol::ChangeSource src, const Kontrol::Rack &rack) override {
+        if (src != Kontrol::CS_LOCAL) {
+            app_->publishEnd();
+        }
     }
 
-    // void savePreset(ChangeSource, const Rack &, std::string preset) { ; }
+    void savePreset(Kontrol::ChangeSource src, const Kontrol::Rack &rack, std::string preset) override {
+        if (src == Kontrol::CS_LOCAL) {
+            auto &sysex = sysExOutStream_;
+            sysex.begin();
+
+            sysex.addHeader(E1_SAVE_PRESET_MSG);
+            sysex.addUnsigned(stringToken(rack.id().c_str()));
+            sysex.addString(preset.c_str());
+            sysex.end();
+            send(sysex);
+//        } else {
+        }
+    }
 
     void loadPreset(Kontrol::ChangeSource src, const Kontrol::Rack &rack, std::string preset) override {
-        if (src != Kontrol::CS_LOCAL) {
-        } else {
+        if (src == Kontrol::CS_LOCAL) {
             auto &sysex = sysExOutStream_;
             sysex.begin();
 
@@ -166,15 +167,87 @@ public:
             sysex.addString(preset.c_str());
             sysex.end();
             send(sysex);
+//        } else {
         }
     }
 
-    // void saveSettings(ChangeSource, const Rack &) { ; }
+    void saveSettings(Kontrol::ChangeSource src, const Kontrol::Rack &rack) override {
+        if (src == Kontrol::CS_LOCAL) {
+            auto &sysex = sysExOutStream_;
+            sysex.begin();
 
-    // void midiLearn(ChangeSource src, bool b) { ; }
-    // void modulationLearn(ChangeSource src, bool b) { ; }
+            sysex.addHeader(E1_SAVE_SETTINGS_MSG);
+            sysex.addUnsigned(stringToken(rack.id().c_str()));
+            sysex.end();
+            send(sysex);
+//        } else {
+        }
+    }
 
-    // void stop() { ; }
+    void midiLearn(Kontrol::ChangeSource src, bool b) override {
+        if (src == Kontrol::CS_LOCAL) {
+            auto &sysex = sysExOutStream_;
+            sysex.begin();
+
+            sysex.addHeader(E1_MIDI_LEARN_MSG);
+            sysex.addUnsigned(b);
+            sysex.end();
+            send(sysex);
+//        } else {
+        }
+    }
+
+    void modulationLearn(Kontrol::ChangeSource src, bool b) override {
+        if (src == Kontrol::CS_LOCAL) {
+            auto &sysex = sysExOutStream_;
+            sysex.begin();
+
+            sysex.addHeader(E1_MOD_LEARN_MSG);
+            sysex.addUnsigned(b);
+            sysex.end();
+            send(sysex);
+        } else {
+            app_->modulationLearn(b);
+        }
+    }
+
+/*
+ * Unused
+
+    void activeModule(Kontrol::ChangeSource, const Kontrol::Rack &, const Kontrol::Module &) {
+    }
+
+
+    void ping(Kontrol::ChangeSource src,
+              const std::string &host, unsigned port,
+              unsigned keepAlive) override {
+    }
+
+    void assignMidiCC(Kontrol::ChangeSource,
+                      const Kontrol::Rack &, const Kontrol::Module &, const Kontrol::Parameter &,
+                      unsigned midiCC) override {
+    }
+
+    void unassignMidiCC(Kontrol::ChangeSource, const Kontrol::Rack &,
+                        const Kontrol::Module &, const Kontrol::Parameter &,
+                        unsigned midiCC) override {
+    }
+
+    void assignModulation(Kontrol::ChangeSource,
+                          const Kontrol::Rack &, const Kontrol::Module &, const Kontrol::Parameter &,
+                          unsigned bus) override {
+    }
+
+    void unassignModulation(Kontrol::ChangeSource,
+                            const Kontrol::Rack &, const Kontrol::Module &, const Kontrol::Parameter &,
+                            unsigned bus) override {
+    }
+
+
+    void stop() {}
+*/
+
+
 private:
     void send(SysExOutputStream &sysex) { app_->send(sysex); }
 
@@ -203,9 +276,9 @@ void ElectraApp::setup(void) {
 
     presetMenuItems_ = menu->addMenu("Presets");
 
-    menu->addItem("Midi Learn [x]", [this](void) { midiLearn(); });
-    menu->addItem("Mod Learn [x]", [this](void) { modLearn(); });
-    menu->addItem("Save", [this](void) { patchSave(); });
+    menu->addItem("Midi Learn", [this](void) { menuMidiLearn(); });
+    menu->addItem("Mod Learn", [this](void) { menuModLearn(); });
+    menu->addItem("Save", [this](void) { menuSaveSettings(); });
 
     LocalFile config(context.getCurrentConfigFile());
 
@@ -527,13 +600,33 @@ bool ElectraApp::handleE1SysEx(Kontrol::ChangeSource src,
             model->loadModule(src, rackId, modId, modType);
             break;
         }
+        case E1_SAVE_PRESET_MSG : {
+            Kontrol::EntityId rackId = tokenString(sysex.readUnsigned());
+            std::string preset = sysex.readString();
+            model->savePreset(src, rackId, preset);
+            break;
+        }
         case E1_LOAD_PRESET_MSG : {
             Kontrol::EntityId rackId = tokenString(sysex.readUnsigned());
             std::string preset = sysex.readString();
             model->loadPreset(src, rackId, preset);
             break;
         }
-
+        case E1_SAVE_SETTINGS_MSG : {
+            Kontrol::EntityId rackId = tokenString(sysex.readUnsigned());
+            model->saveSettings(src, rackId);
+            break;
+        }
+        case E1_MIDI_LEARN_MSG : {
+            bool b = sysex.readUnsigned() > 0;
+            model->midiLearn(src, b);
+            break;
+        }
+        case E1_MOD_LEARN_MSG : {
+            bool b = sysex.readUnsigned() > 0;
+            model->modulationLearn(src, b);
+            break;
+        }
         case E1_SYSEX_MAX:
         default: {
             return false;
@@ -547,8 +640,8 @@ void ElectraApp::publishStart() {
     menuWindow_.clearMenu(moduleMenuItems_);
     menuWindow_.clearMenu(presetMenuItems_);
 
-    presetMenuItems_->addItem("Save Preset", [this](void) { presetSave(); });
-    presetMenuItems_->addItem("New Preset", [this](void) { presetNew(); });
+    presetMenuItems_->addItem("Save Preset", [this](void) { menuPresetSave(); });
+    presetMenuItems_->addItem("New Preset", [this](void) { menuPresetNew(); });
 
     //TODO , clear model?
 
@@ -561,7 +654,7 @@ void ElectraApp::publishEnd() {
 // menu management
 void ElectraApp::addPreset(const std::string &p) {
     if (!presetMenuItems_->find(p)) {
-        presetMenuItems_->addItem(p, [this]() { presetSelect(); });
+        presetMenuItems_->addItem(p, [this]() { menuPresetSelect(); });
     }
 }
 
@@ -569,7 +662,7 @@ void ElectraApp::addModule(const std::string &m) {
     size_t pos = m.find("/");
     if (pos == std::string::npos) {
         if (!moduleMenuItems_->find(m)) {
-            moduleMenuItems_->addItem(m, [this]() { moduleSelect(); });
+            moduleMenuItems_->addItem(m, [this]() { menuModuleSelect(); });
         }
     } else {
         std::string cat = m.substr(0, pos + 1);
@@ -579,34 +672,77 @@ void ElectraApp::addModule(const std::string &m) {
             catmenu = moduleMenuItems_->addMenu(cat);
         }
         if (!catmenu->find(mod)) {
-            catmenu->addItem(mod, [this]() { moduleSelect(); });
+            catmenu->addItem(mod, [this]() { menuModuleSelect(); });
         }
     }
 }
 
+
+void ElectraApp::midiLearn(bool b) {
+    midiLearnActive_ = b;
+}
+
+void ElectraApp::modulationLearn(bool b) {
+    modulationLearnActive_ = b;
+}
+
 // menu items
-void ElectraApp::presetNew() {
-
+void ElectraApp::menuPresetNew() {
+    auto model = Kontrol::KontrolModel::model();
+    auto orack = mainWindow().getActiveRack();
+    if (orack) {
+        auto rackId = orack->rackId();
+        auto pRack = model->getRack(rackId);
+        if (pRack) {
+            auto presets = pRack->getResources("preset");
+            int sz = presets.size();
+            std::string newPreset = "new-" + std::to_string(sz);
+            dbgMessage("create new preset : %s", newPreset.c_str());
+            model->savePreset(Kontrol::CS_LOCAL, rackId, newPreset);
+            windows_.select(AppWindows::MAIN);
+        }
+    }
 }
 
-void ElectraApp::presetSave() {
-
+void ElectraApp::menuPresetSave() {
+    auto model = Kontrol::KontrolModel::model();
+    auto orack = mainWindow().getActiveRack();
+    if (orack) {
+        auto rackId = orack->rackId();
+        auto pRack = model->getRack(rackId);
+        if (pRack) {
+            auto preset = pRack->currentPreset();
+            model->savePreset(Kontrol::CS_LOCAL, rackId, preset);
+            windows_.select(AppWindows::MAIN);
+        }
+    }
 }
 
-void ElectraApp::modLearn() {
-
+void ElectraApp::menuModLearn() {
+    auto model = Kontrol::KontrolModel::model();
+    bool b = !modulationLearn();
+    model->modulationLearn(Kontrol::CS_LOCAL, b);
+    windows_.select(AppWindows::MAIN);
 }
 
-void ElectraApp::midiLearn() {
-
+void ElectraApp::menuMidiLearn() {
+    auto model = Kontrol::KontrolModel::model();
+    bool b = !midiLearn();
+    model->midiLearn(Kontrol::CS_LOCAL, b);
+    windows_.select(AppWindows::MAIN);
 }
 
-void ElectraApp::patchSave() {
-
+void ElectraApp::menuSaveSettings() {
+    auto model = Kontrol::KontrolModel::model();
+    auto orack = mainWindow().getActiveRack();
+    if (orack) {
+        model->saveSettings(Kontrol::CS_LOCAL, orack->rackId());
+        windows_.select(AppWindows::MAIN);
+    }
 }
 
 
-void ElectraApp::moduleSelect() {
+void ElectraApp::menuModuleSelect() {
     auto model = Kontrol::KontrolModel::model();
     unsigned cidx = moduleMenuItems_->idx_;
     if (cidx < moduleMenuItems_->items_.size()) {
@@ -624,6 +760,7 @@ void ElectraApp::moduleSelect() {
                     auto omod = orack->getActiveModule();
                     if (omod) {
                         model->loadModule(Kontrol::CS_LOCAL, omod->rackId(), omod->moduleId(), module);
+                        windows_.select(AppWindows::MAIN);
                     }
                 }
             }
@@ -636,21 +773,23 @@ void ElectraApp::moduleSelect() {
                 auto omod = orack->getActiveModule();
                 if (omod) {
                     model->loadModule(Kontrol::CS_LOCAL, omod->rackId(), omod->moduleId(), module);
+                    windows_.select(AppWindows::MAIN);
                 }
             }
         }
     }
 }
 
-void ElectraApp::presetSelect() {
+void ElectraApp::menuPresetSelect() {
     unsigned pidx = presetMenuItems_->idx_;
     if (pidx < presetMenuItems_->items_.size()) {
         auto pItem = presetMenuItems_->items_[pidx];
         std::string preset = pItem->name_;
-        dbgMessage("presetSelect : preset %s", preset.c_str());
+//        dbgMessage("presetSelect : preset %s", preset.c_str());
 
         auto rackId = mainWindow().getActiveRack()->rackId();
         auto model = Kontrol::KontrolModel::model();
         model->loadPreset(Kontrol::CS_LOCAL, rackId, preset);
+        windows_.select(AppWindows::MAIN);
     }
 }
