@@ -27,7 +27,6 @@ void MainWindow::potMove(uint8_t potId, int16_t relativeChange) {
             return;
         }
     }
-    dbgMessage("MainWindows::potMove %d, %d, %d", potId, relativeChange, buttonState_[BUTTON_LEFT_TOP]);
     OWindow::potMove(potId, relativeChange);
 }
 
@@ -60,28 +59,28 @@ void MainWindow::buttonUp(uint8_t buttonId) {
 
     switch (buttonId) {
         case BUTTON_LEFT_TOP : {
-            if (getActiveRack()) getActiveRack()->prevDisplay();
             break;
         }
         case BUTTON_LEFT_MIDDLE : {
-            if (getActiveRack()) getActiveRack()->nextDisplay();
             break;
         }
         case BUTTON_LEFT_BOTTOM: {
             break;
         }
         case BUTTON_RIGHT_TOP : {
-            if (getActiveRack() && getActiveRack()->getActiveModule()) getActiveRack()->getActiveModule()->prevDisplay();
+            // TODO : improve, don't use cast
+            auto eapp = static_cast<ElectraApp *>(app);
+            eapp->selectModule();
+            eapp->getAppWindows()->select(AppWindows::MODULE);
             break;
         }
         case BUTTON_RIGHT_MIDDLE : {
-            if (getActiveRack() && getActiveRack()->getActiveModule()) getActiveRack()->getActiveModule()->nextDisplay();
+            auto eapp = static_cast<ElectraApp *>(app);
+            eapp->getAppWindows()->select(AppWindows::PRESET);
+            break;
             break;
         }
         case BUTTON_RIGHT_BOTTOM: {
-            // TODO : improve, don't use cast
-            auto eapp = static_cast<ElectraApp *>(app);
-            eapp->getAppWindows()->select(AppWindows::MENU);
             break;
         }
         default: {
@@ -121,3 +120,5 @@ void MainWindow::buttonLongHold(uint8_t buttonId) {
         eapp->getAppWindows()->select(AppWindows::DEBUG);
     }
 }
+
+

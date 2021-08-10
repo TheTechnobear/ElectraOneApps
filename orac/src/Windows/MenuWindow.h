@@ -31,12 +31,22 @@ struct MenuItem {
 
     std::shared_ptr<MenuItem> find(const std::string &n) {
         for (auto i : items_) {
-            if (i->name_ == n) {
-                return i;
-            }
+            if (i->name_ == n) return i;
         }
         return nullptr;
     }
+
+    int findIdx(const std::string &n) {
+        unsigned idx = 0;
+        for (const auto &i : items_) {
+            if (i->name_ == n) {
+                return idx;
+            }
+            idx++;
+        }
+        return -1;
+    }
+
 
     std::string name_;
     std::function<void(void)> action_;
@@ -88,8 +98,20 @@ public:
 
     void clearMenu(std::shared_ptr<MenuItem> &item);
 
-private:
+protected:
     static constexpr unsigned MAX_DISPLAY = 15;
     std::shared_ptr<MenuItem> topMenu_;
     MenuItem *curMenu_;
+};
+
+
+class ModuleWindow : public MenuWindow {
+public:
+    explicit ModuleWindow() = default;
+    void select(const std::string &m);
+};
+
+class PresetWindow : public MenuWindow {
+public:
+    explicit PresetWindow() = default;
 };

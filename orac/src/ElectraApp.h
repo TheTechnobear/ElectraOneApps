@@ -11,7 +11,8 @@
 
 
 class MainWindow;
-class MenuWindow;
+class ModuleWindow;
+class PresetWindow;
 struct MenuItem;
 
 #include "Windows/AppWindows.h"
@@ -68,6 +69,7 @@ public:
     void addPreset(const std::string &preset);
     void addModule(const std::string &module);
 
+    void selectModule();
 
     // menu items
     void menuPresetNew();
@@ -106,7 +108,8 @@ private:
     bool modulationLearnActive_ = false;
 
     std::shared_ptr<MainWindow> mainWindow_;
-    std::shared_ptr<MenuWindow> menuWindow_;
+    std::shared_ptr<ModuleWindow> moduleWindow_;
+    std::shared_ptr<PresetWindow> presetWindow_;
 
     AppWindows windows_;
     std::shared_ptr<MenuItem> moduleMenuItems_;

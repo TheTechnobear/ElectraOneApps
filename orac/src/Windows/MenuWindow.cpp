@@ -117,3 +117,44 @@ void MenuWindow::back() {
         repaint();
     }
 }
+
+
+void ModuleWindow::select(const std::string &m) {
+    curMenu_ = topMenu_.get();
+    curMenu_->idx_ = 0;
+    curMenu_->offset_ = 0;
+    size_t pos = m.find('/');
+    if (pos == std::string::npos) {
+        // module at top level
+        int idx = curMenu_->findIdx(m);
+        if (idx >= 0) {
+            curMenu_->idx_ = idx;
+            if (curMenu_->idx_ >= MAX_DISPLAY) curMenu_->offset_ = curMenu_->idx_;
+        }
+    } else {
+        std::string cat = m.substr(0, pos + 1);
+        std::string mod = m.substr(pos + 2);
+
+        auto catmenu = curMenu_->find(cat);
+        if (!catmenu) {
+            return;
+        }
+
+        // select cat
+        int idx = curMenu_->findIdx(cat);
+        if (idx >= 0) {
+            curMenu_->idx_ = idx;
+            if (curMenu_->idx_ >= MAX_DISPLAY) curMenu_->offset_ = curMenu_->idx_;
+        }
+        curMenu_ = catmenu.get();
+
+        // select module
+        idx = curMenu_->findIdx(mod);
+        if (idx >= 0) {
+            curMenu_->idx_ = idx;
+            if (curMenu_->idx_ >= MAX_DISPLAY) curMenu_->offset_ = curMenu_->idx_;
+        } else {
+            curMenu_->idx_ = 0;
+        }
+    }
+}

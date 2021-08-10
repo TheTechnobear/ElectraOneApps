@@ -62,9 +62,7 @@ public:
         processPotTouch(potId, false);
     }
 
-    void potMove(uint8_t potId, int16_t relativeChange) override {
-        processPot(potId, relativeChange);
-    }
+    void potMove(uint8_t potId, int16_t relativeChange) override;
 
     void buttonUp(uint8_t buttonId) override {
         buttonHandled(buttonId);
@@ -91,6 +89,7 @@ public:
     void buttonHandled(uint8_t buttonId);
 
     bool isButtonHandled(uint8_t buttonId);
+    void processPot(uint8_t potId, int16_t relativeChange) override;
 
 protected:
     int processRelease_ = 0x0;

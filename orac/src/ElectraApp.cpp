@@ -3,272 +3,22 @@
 #include <vector>
 #include <memory>
 
-
 #include "Windows/MainWindow.h"
 #include "Windows/MenuWindow.h"
 #include "Debug.h"
 
+
+#include "E1KontrolCallback.h"
+
 ElectraApp electraApp;
-
-
-class E1KontrolCallback : public Kontrol::KontrolCallback {
-public:
-    E1KontrolCallback(ElectraApp *a)
-        : app_(a), sysExOutStream_(OUTPUT_MAX_SZ) {
-    }
-
-    ~E1KontrolCallback() {}
-
-    void rack(Kontrol::ChangeSource src,
-              const Kontrol::Rack &r) override {
-        if (src == Kontrol::CS_LOCAL) {
-        } else {
-            app_->mainWindow()->addRack(r);
-        }
-    }
-
-    void module(Kontrol::ChangeSource src,
-                const Kontrol::Rack &r,
-                const Kontrol::Module &m) override {
-        if (src == Kontrol::CS_LOCAL) {
-        } else {
-            auto rack = app_->mainWindow()->getRack(r.id());
-            if (rack) {
-                rack->addModule(r, m);
-            }
-        }
-    }
-
-    void page(Kontrol::ChangeSource src, const Kontrol::Rack &r,
-              const Kontrol::Module &m, const Kontrol::Page &p) override {
-        if (src == Kontrol::CS_LOCAL) {
-        } else {
-            auto rack = app_->mainWindow()->getRack(r.id());
-            if (rack) {
-                auto module = rack->getModule(m.id());
-                if (module) {
-                    module->addPage(r, m, p);
-                }
-            }
-        }
-    }
-
-    void param(Kontrol::ChangeSource, const Kontrol::Rack &,
-               const Kontrol::Module &, const Kontrol::Parameter &) override {
-        // TODO : check, do I need param handling?
-    }
-
-    void changed(Kontrol::ChangeSource src, const Kontrol::Rack &rack,
-                 const Kontrol::Module &module,
-                 const Kontrol::Parameter &p) override {
-
-        if (src == Kontrol::CS_LOCAL) {
-            // logMessage("E1KontrolCallback::changed");
-
-            // if (!broadcastChange(src)) return;
-            // if (!isActive()) return;
-            auto &sysex = sysExOutStream_;
-            sysex.begin();
-
-            sysex.addHeader(E1_CHANGED_MSG);
-            sysex.addUnsigned(stringToken(rack.id().c_str()));
-            sysex.addUnsigned(stringToken(module.id().c_str()));
-            sysex.addString(p.id().c_str());
-
-            auto v = p.current();
-            switch (v.type()) {
-                case Kontrol::ParamValue::T_Float: {
-                    sysex.addUnsigned(v.type());
-                    sysex.addFloat(v.floatValue());
-                    break;
-                }
-                case Kontrol::ParamValue::T_String:
-                default: {
-                    sysex.addUnsigned(Kontrol::ParamValue::T_String);
-                    sysex.addString(v.stringValue().c_str());
-                }
-            }
-
-            sysex.end();
-            send(sysex);
-
-        } else {
-            auto rackpage = app_->mainWindow()->getRack(rack.id());
-            if (rackpage) {
-                auto modulepage = rackpage->getModule(module.id());
-                if (modulepage) {
-                    // TODO - need to look for param, and only repaint that ?
-//                    dbgMessage("E1KontrolCallback::changed");
-                    if (modulepage->isVisible()) modulepage->repaint();
-                }
-            }
-        }
-    }
-
-    void deleteRack(Kontrol::ChangeSource, const Kontrol::Rack &) override {
-        // not using but pure virtual
-    }
-
-    void resource(Kontrol::ChangeSource src, const Kontrol::Rack &,
-                  const std::string &t, const std::string &v) override {
-        if (src != Kontrol::CS_LOCAL) {
-            if (t == "module") {
-                app_->addModule(v);
-            } else if (t == "preset") {
-                app_->addPreset(v);
-            }
-        }
-    }
-
-    void loadModule(Kontrol::ChangeSource src, const Kontrol::Rack &rack, const Kontrol::EntityId &modId, const std::string &modType) override {
-        if (src == Kontrol::CS_LOCAL) {
-            auto &sysex = sysExOutStream_;
-            sysex.begin();
-
-            sysex.addHeader(E1_LOAD_MODULE_MSG);
-            sysex.addUnsigned(stringToken(rack.id().c_str()));
-            sysex.addUnsigned(stringToken(modId.c_str()));
-            sysex.addString(modType.c_str());
-
-            sysex.end();
-            send(sysex);
-//        } else {
-        }
-    }
-
-    void publishStart(Kontrol::ChangeSource src, unsigned numRacks) override {
-        if (src != Kontrol::CS_LOCAL) {
-            app_->publishStart();
-        }
-    }
-
-    void publishRackFinished(Kontrol::ChangeSource src, const Kontrol::Rack &rack) override {
-        if (src != Kontrol::CS_LOCAL) {
-            app_->publishEnd();
-        }
-    }
-
-    void savePreset(Kontrol::ChangeSource src, const Kontrol::Rack &rack, std::string preset) override {
-        if (src == Kontrol::CS_LOCAL) {
-            auto &sysex = sysExOutStream_;
-            sysex.begin();
-
-            sysex.addHeader(E1_SAVE_PRESET_MSG);
-            sysex.addUnsigned(stringToken(rack.id().c_str()));
-            sysex.addString(preset.c_str());
-            sysex.end();
-            send(sysex);
-//        } else {
-        }
-    }
-
-    void loadPreset(Kontrol::ChangeSource src, const Kontrol::Rack &rack, std::string preset) override {
-        if (src == Kontrol::CS_LOCAL) {
-            auto &sysex = sysExOutStream_;
-            sysex.begin();
-
-            sysex.addHeader(E1_LOAD_PRESET_MSG);
-            sysex.addUnsigned(stringToken(rack.id().c_str()));
-            sysex.addString(preset.c_str());
-            sysex.end();
-            send(sysex);
-//        } else {
-        }
-    }
-
-    void saveSettings(Kontrol::ChangeSource src, const Kontrol::Rack &rack) override {
-        if (src == Kontrol::CS_LOCAL) {
-            auto &sysex = sysExOutStream_;
-            sysex.begin();
-
-            sysex.addHeader(E1_SAVE_SETTINGS_MSG);
-            sysex.addUnsigned(stringToken(rack.id().c_str()));
-            sysex.end();
-            send(sysex);
-//        } else {
-        }
-    }
-
-    void midiLearn(Kontrol::ChangeSource src, bool b) override {
-        if (src == Kontrol::CS_LOCAL) {
-            auto &sysex = sysExOutStream_;
-            sysex.begin();
-
-            sysex.addHeader(E1_MIDI_LEARN_MSG);
-            sysex.addUnsigned(b);
-            sysex.end();
-            send(sysex);
-//        } else {
-        }
-    }
-
-    void modulationLearn(Kontrol::ChangeSource src, bool b) override {
-        if (src == Kontrol::CS_LOCAL) {
-            auto &sysex = sysExOutStream_;
-            sysex.begin();
-
-            sysex.addHeader(E1_MOD_LEARN_MSG);
-            sysex.addUnsigned(b);
-            sysex.end();
-            send(sysex);
-        } else {
-            app_->modulationLearn(b);
-        }
-    }
-
-/*
- * Unused
-
-    void activeModule(Kontrol::ChangeSource, const Kontrol::Rack &, const Kontrol::Module &) {
-    }
-
-
-    void ping(Kontrol::ChangeSource src,
-              const std::string &host, unsigned port,
-              unsigned keepAlive) override {
-    }
-
-    void assignMidiCC(Kontrol::ChangeSource,
-                      const Kontrol::Rack &, const Kontrol::Module &, const Kontrol::Parameter &,
-                      unsigned midiCC) override {
-    }
-
-    void unassignMidiCC(Kontrol::ChangeSource, const Kontrol::Rack &,
-                        const Kontrol::Module &, const Kontrol::Parameter &,
-                        unsigned midiCC) override {
-    }
-
-    void assignModulation(Kontrol::ChangeSource,
-                          const Kontrol::Rack &, const Kontrol::Module &, const Kontrol::Parameter &,
-                          unsigned bus) override {
-    }
-
-    void unassignModulation(Kontrol::ChangeSource,
-                            const Kontrol::Rack &, const Kontrol::Module &, const Kontrol::Parameter &,
-                            unsigned bus) override {
-    }
-
-
-    void stop() {}
-*/
-
-
-private:
-    void send(SysExOutputStream &sysex) { app_->send(sysex); }
-
-    unsigned stringToken(const char *str) { return app_->stringToken(str); }
-
-    static constexpr int OUTPUT_MAX_SZ = 128;
-    SysExOutputStream sysExOutStream_;
-    ElectraApp *app_;
-};
-
 
 ElectraApp::ElectraApp() {
     mainWindow_ = std::make_shared<MainWindow>();
-    menuWindow_ = std::make_shared<MenuWindow>();
+    moduleWindow_ = std::make_shared<ModuleWindow>();
+    presetWindow_ = std::make_shared<PresetWindow>();
     windows_.add(mainWindow_.get());
-    windows_.add(menuWindow_.get());
+    windows_.add(moduleWindow_.get());
+    windows_.add(presetWindow_.get());
     if (DebugWindow::debugWindow()) windows_.add(DebugWindow::debugWindow());
 }
 
@@ -282,14 +32,13 @@ void ElectraApp::setup(void) {
     context.setAppName(APP_NAME);
     enableMidi = true;
 
-    auto menu = menuWindow_->getMenu();
-    moduleMenuItems_ = menu->addMenu("Modules");
+    moduleMenuItems_ = moduleWindow_->getMenu();
+    presetMenuItems_ = presetWindow_->getMenu();
 
-    presetMenuItems_ = menu->addMenu("Presets");
-
-    menu->addItem("Midi Learn", [this](void) { menuMidiLearn(); });
-    menu->addItem("Mod Learn", [this](void) { menuModLearn(); });
-    menu->addItem("Save", [this](void) { menuSaveSettings(); });
+    //TODO midi/mod learn and save
+//    menu->addItem("Midi Learn", [this](void) { menuMidiLearn(); });
+//    menu->addItem("Mod Learn", [this](void) { menuModLearn(); });
+//    menu->addItem("Save", [this](void) { menuSaveSettings(); });
 
     LocalFile config(context.getCurrentConfigFile());
 
@@ -630,8 +379,8 @@ bool ElectraApp::handleE1SysEx(Kontrol::ChangeSource src,
 // start end of setup {
 void ElectraApp::publishStart() {
     dbgMessage("Initialising from Orac");
-    menuWindow_->clearMenu(moduleMenuItems_);
-    menuWindow_->clearMenu(presetMenuItems_);
+    moduleWindow_->clearMenu(moduleMenuItems_);
+    presetWindow_->clearMenu(presetMenuItems_);
 
     presetMenuItems_->addItem("Save Preset", [this](void) { menuPresetSave(); });
     presetMenuItems_->addItem("New Preset", [this](void) { menuPresetNew(); });
@@ -652,7 +401,7 @@ void ElectraApp::addPreset(const std::string &p) {
 }
 
 void ElectraApp::addModule(const std::string &m) {
-    size_t pos = m.find("/");
+    size_t pos = m.find('/');
     if (pos == std::string::npos) {
         if (!moduleMenuItems_->find(m)) {
             moduleMenuItems_->addItem(m, [this]() { menuModuleSelect(); });
@@ -666,6 +415,22 @@ void ElectraApp::addModule(const std::string &m) {
         }
         if (!catmenu->find(mod)) {
             catmenu->addItem(mod, [this]() { menuModuleSelect(); });
+        }
+    }
+}
+
+void ElectraApp::selectModule() {
+    auto orack = mainWindow()->getActiveRack();
+    if (orack) {
+        auto omodule = orack->getActiveModule();
+        if (omodule) {
+            auto model = Kontrol::KontrolModel::model();
+            auto rack = model->getRack(omodule->rackId());
+            auto module = model->getModule(rack, omodule->moduleId());
+            if (module) {
+                auto modtype = module->type();
+                moduleWindow_->select(modtype);
+            }
         }
     }
 }

@@ -14,7 +14,8 @@ public:
 
     enum WindowType {
         MAIN,
-        MENU,
+        MODULE,
+        PRESET,
         DEBUG,
         MAX_WINDOW
     };
