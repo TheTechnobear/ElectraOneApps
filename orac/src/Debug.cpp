@@ -64,6 +64,12 @@ DebugWindow *DebugWindow::debugWindow() {
     return &debugWindow_;
 }
 
+DebugWindow::DebugWindow(uint16_t newX, uint16_t newY, uint16_t newWidth, uint16_t newHeight, bool newPinOptionAvailable, bool newWindowPinned) :
+    OWindow(newX, newY, newWidth, newHeight,
+            newPinOptionAvailable, newWindowPinned) {
+    doNotUseControlSets();
+}
+
 void DebugWindow::paint() {
     screen.fillRect(screenX, screenY, width, height, COLOR_BLACK);
     Window::paint();
@@ -103,6 +109,8 @@ void DebugWindow::buttonUp(uint8_t buttonId) {
         }
     }
 }
+
+
 
 void dbgMessage(const char *format, ...) {
     char *buf = dbgBuf_.getWritePos();

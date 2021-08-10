@@ -13,7 +13,6 @@
 class MainWindow;
 class MenuWindow;
 struct MenuItem;
-//class DebugWindow;
 
 #include "Windows/AppWindows.h"
 #include "Electra.h"
@@ -108,7 +107,7 @@ private:
 
     std::shared_ptr<MainWindow> mainWindow_;
     std::shared_ptr<MenuWindow> menuWindow_;
-//    std::shared_ptr<DebugWindow> debugWindow_;
+
     AppWindows windows_;
     std::shared_ptr<MenuItem> moduleMenuItems_;
     std::shared_ptr<MenuItem> presetMenuItems_;

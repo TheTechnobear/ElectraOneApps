@@ -4,8 +4,6 @@
 
 #include "../IUICallback.h"
 
-#include "../Debug.h"
-
 class OWindow : public Window, public IUICallback {
 public:
     explicit OWindow(uint16_t newX = 0,
@@ -88,20 +86,11 @@ public:
     }
 
     // button handling
-    void buttonReset(uint8_t buttonId) {
-        int mask = 1 << buttonId;
-        processRelease_ |= mask;
-    }
+    void buttonReset(uint8_t buttonId);
 
-    void buttonHandled(uint8_t buttonId) {
-        int mask = 1 << buttonId;
-        processRelease_ &= ~mask;
-    }
+    void buttonHandled(uint8_t buttonId);
 
-    bool isButtonHandled(uint8_t buttonId) {
-        int mask = 1 << buttonId;
-        return !(processRelease_ & mask);
-    }
+    bool isButtonHandled(uint8_t buttonId);
 
 protected:
     int processRelease_ = 0x0;

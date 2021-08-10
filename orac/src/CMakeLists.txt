@@ -16,4 +16,3 @@ file(GLOB_RECURSE ORAC_E1_H RELATIVE "${PROJECT_SOURCE_DIR}" "*.h")
 
 message(STATUS "INC :${FW_DIR}/src")
 add_library(orac_e1 STATIC ${ORAC_E1_SRC} ${ORAC_E1_H})
-

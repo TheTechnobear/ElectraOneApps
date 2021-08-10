@@ -5,7 +5,6 @@
 
 #include <vector>
 
-#include "Debug.h"
 
 #include "OWindow.h"
 
@@ -51,18 +50,7 @@ public:
         if (w) w->repaint();
     }
 
-    void select(enum WindowType wt) {
-        if (wt < windows_.size()) {
-            auto ow = getCurrentWindow();
-            idx_ = (unsigned) wt;
-            auto w = getCurrentWindow();
-            if (ow != w) {
-                if (ow) ow->setVisible(false);
-                if (w) w->setVisible(true);
-                repaintCurrent();
-            }
-        }
-    }
+    void select(enum WindowType wt);
 
     void nextWindow() {
         auto sz = windows_.size();

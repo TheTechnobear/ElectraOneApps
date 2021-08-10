@@ -11,11 +11,7 @@ public:
                          uint16_t newWidth = 1023,
                          uint16_t newHeight = 561,
                          bool newPinOptionAvailable = false,
-                         bool newWindowPinned = false) :
-        OWindow(newX, newY, newWidth, newHeight,
-                newPinOptionAvailable, newWindowPinned) {
-        doNotUseControlSets();
-    }
+                         bool newWindowPinned = false);
 
     void paint() override;
 
