@@ -29,6 +29,7 @@ public:
     }
 
     void onPotChange(int16_t relativeChange, handle_t handle) override {
+        dbgMessage("ASSERT OracRack::onPotChange %d, %d", handle, relativeChange);
         if (displayIdx_ < displayOrder_.size()) {
             auto id = displayOrder_[displayIdx_];
             if (modules_.count(id) > 0) {

@@ -5,6 +5,47 @@
 #include "OWindow.h"
 
 
+struct MenuItem;
+
+struct MenuItem {
+    MenuItem(std::string n, MenuItem *p)
+        : name_(std::move(n)), action_(nullptr), parent_(p) {
+    }
+
+    MenuItem(std::string n, std::function<void(void)> fn)
+        : name_(std::move(n)), action_(std::move(fn)), parent_(nullptr) {
+    }
+
+    void addItem(const std::string &n, std::function<void(void)> fn) {
+        auto i = std::make_shared<MenuItem>(n, fn);
+        items_.push_back(i);
+    }
+
+    std::shared_ptr<MenuItem> addMenu(const std::string &n) {
+        auto i = std::make_shared<MenuItem>(n, this);
+        items_.push_back(i);
+        return i;
+    }
+
+
+    std::shared_ptr<MenuItem> find(const std::string &n) {
+        for (auto i : items_) {
+            if (i->name_ == n) {
+                return i;
+            }
+        }
+        return nullptr;
+    }
+
+    std::string name_;
+    std::function<void(void)> action_;
+    std::vector<std::shared_ptr<MenuItem>> items_;
+
+    MenuItem *parent_;
+    unsigned offset_ = 0;
+    unsigned idx_ = 0;
+};
+
 class MenuWindow : public OWindow {
 public:
     explicit MenuWindow(uint16_t newX = 0,
@@ -20,46 +61,6 @@ public:
         curMenu_ = topMenu_.get();
     }
 
-    struct MenuItem;
-
-    struct MenuItem {
-        MenuItem(std::string n, MenuItem *p)
-            : name_(std::move(n)), action_(nullptr), parent_(p) {
-        }
-
-        MenuItem(std::string n, std::function<void(void)> fn)
-            : name_(std::move(n)), action_(std::move(fn)), parent_(nullptr) {
-        }
-
-        void addItem(const std::string &n, std::function<void(void)> fn) {
-            auto i = std::make_shared<MenuItem>(n, fn);
-            items_.push_back(i);
-        }
-
-        std::shared_ptr<MenuItem> addMenu(const std::string &n) {
-            auto i = std::make_shared<MenuItem>(n, this);
-            items_.push_back(i);
-            return i;
-        }
-
-
-        std::shared_ptr<MenuItem> find(const std::string &n) {
-            for (auto i : items_) {
-                if (i->name_ == n) {
-                    return i;
-                }
-            }
-            return nullptr;
-        }
-
-        std::string name_;
-        std::function<void(void)> action_;
-        std::vector<std::shared_ptr<MenuItem>> items_;
-
-        MenuItem *parent_;
-        unsigned offset_ = 0;
-        unsigned idx_ = 0;
-    };
 
     void paint() override {
         screen.fillRect(screenX, screenY, width, height, COLOR_BLACK);
@@ -86,48 +87,83 @@ public:
 
     std::shared_ptr<MenuItem> getMenu() { return topMenu_; }
 
-    void buttonUp(uint8_t buttonId) override {
-        switch (buttonId) {
-            case BUTTON_LEFT_TOP : { // prev
-                if (curMenu_->idx_ > 0) {
-                    curMenu_->idx_--;
-                    if ((curMenu_->idx_ - curMenu_->offset_) >= MAX_DISPLAY) {
-                        curMenu_->offset_ = curMenu_->idx_;
-                    }
-                    repaint();
-                }
-                break;
+    void next() {
+        if (curMenu_->idx_ < (curMenu_->items_.size() - 1)) {
+            curMenu_->idx_++;
+            if ((curMenu_->idx_ - curMenu_->offset_) >= MAX_DISPLAY) {
+                curMenu_->offset_ = curMenu_->idx_ - (MAX_DISPLAY - 1);
             }
-            case BUTTON_LEFT_MIDDLE : { // next
-                if (curMenu_->idx_ < (curMenu_->items_.size() - 1)) {
-                    curMenu_->idx_++;
-                    if ((curMenu_->idx_ - curMenu_->offset_) >= MAX_DISPLAY) {
-                        curMenu_->offset_ = curMenu_->idx_ - (MAX_DISPLAY - 1);
-                    }
 
-                    repaint();
+            repaint();
+        }
+    }
+
+    void prev() {
+        if (curMenu_->idx_ > 0) {
+            curMenu_->idx_--;
+            if ((curMenu_->idx_ - curMenu_->offset_) >= MAX_DISPLAY) {
+                curMenu_->offset_ = curMenu_->idx_;
+            }
+            repaint();
+        }
+    }
+
+    void select() {
+        if (curMenu_->idx_ >= 0 && curMenu_->idx_ < curMenu_->items_.size()) {
+            auto i = curMenu_->items_[curMenu_->idx_];
+            if (i->action_) {
+                i->action_();
+            } else {
+                if (!i->items_.empty()) {
+                    curMenu_ = i.get();
                 }
+            }
+            repaint();
+        }
+    }
+
+    void back() {
+        if (curMenu_->parent_) {
+            curMenu_ = curMenu_->parent_;
+            repaint();
+        }
+    }
+
+    void potMove(uint8_t potId, int16_t relativeChange) override {
+        if (potId == 0) {
+            if (relativeChange > 0) {
+                next();
+            } else {
+                prev();
+            }
+        }
+    }
+
+    void buttonUp(uint8_t buttonId) override {
+        if(isButtonHandled(buttonId) || !isVisible()) return;
+        OWindow::buttonUp(buttonId);
+
+        switch (buttonId) {
+            case BUTTON_LEFT_TOP : {
+                prev();
                 break;
             }
-            case BUTTON_RIGHT_TOP : { // select
-                if (curMenu_->idx_ >= 0 && curMenu_->idx_ < curMenu_->items_.size()) {
-                    auto i = curMenu_->items_[curMenu_->idx_];
-                    if (i->action_) {
-                        i->action_();
-                    } else {
-                        if (!i->items_.empty()) {
-                            curMenu_ = i.get();
-                        }
-                    }
-                    repaint();
-                }
+            case BUTTON_LEFT_MIDDLE : {
+                next();
                 break;
             }
-            case BUTTON_RIGHT_MIDDLE : { //back
-                if (curMenu_->parent_) {
-                    curMenu_ = curMenu_->parent_;
-                    repaint();
-                }
+            case BUTTON_RIGHT_TOP : {
+                select();
+                break;
+            }
+            case BUTTON_RIGHT_MIDDLE : {
+                back();
+                break;
+            }
+            case BUTTON_RIGHT_BOTTOM : {
+                // TODO : improve, don't use cast
+                auto eapp = static_cast<ElectraApp *>(app);
+                eapp->getAppWindows()->select(AppWindows::MAIN);
                 break;
             }
             default: {

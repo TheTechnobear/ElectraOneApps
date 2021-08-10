@@ -3,6 +3,11 @@
 #include <vector>
 #include <memory>
 
+
+#include "Windows/MainWindow.h"
+#include "Windows/MenuWindow.h"
+#include "Debug.h"
+
 ElectraApp electraApp;
 
 
@@ -18,7 +23,7 @@ public:
               const Kontrol::Rack &r) override {
         if (src == Kontrol::CS_LOCAL) {
         } else {
-            app_->mainWindow().addRack(r);
+            app_->mainWindow()->addRack(r);
         }
     }
 
@@ -27,7 +32,7 @@ public:
                 const Kontrol::Module &m) override {
         if (src == Kontrol::CS_LOCAL) {
         } else {
-            auto rack = app_->mainWindow().getRack(r.id());
+            auto rack = app_->mainWindow()->getRack(r.id());
             if (rack) {
                 rack->addModule(r, m);
             }
@@ -38,7 +43,7 @@ public:
               const Kontrol::Module &m, const Kontrol::Page &p) override {
         if (src == Kontrol::CS_LOCAL) {
         } else {
-            auto rack = app_->mainWindow().getRack(r.id());
+            auto rack = app_->mainWindow()->getRack(r.id());
             if (rack) {
                 auto module = rack->getModule(m.id());
                 if (module) {
@@ -88,7 +93,7 @@ public:
             send(sysex);
 
         } else {
-            auto rackpage = app_->mainWindow().getRack(rack.id());
+            auto rackpage = app_->mainWindow()->getRack(rack.id());
             if (rackpage) {
                 auto modulepage = rackpage->getModule(module.id());
                 if (modulepage) {
@@ -260,18 +265,24 @@ private:
 
 
 ElectraApp::ElectraApp() {
-    windows_.add(&mainWindow_);
-    windows_.add(&menuWindow_);
+    mainWindow_ = std::make_shared<MainWindow>();
+    menuWindow_ = std::make_shared<MenuWindow>();
+    windows_.add(mainWindow_.get());
+    windows_.add(menuWindow_.get());
     if (DebugWindow::debugWindow()) windows_.add(DebugWindow::debugWindow());
 }
 
 void ElectraApp::setup(void) {
+    windows_.select(AppWindows::DEBUG);
+    dbgMessage("Orac Firmware");
+    dbgMessage("Waiting for Orac and MEC to start on host");
+
     auto cb = std::make_shared<E1KontrolCallback>(this);
     Kontrol::KontrolModel::model()->addCallback("e1", cb);
     context.setAppName(APP_NAME);
     enableMidi = true;
 
-    auto menu = menuWindow_.getMenu();
+    auto menu = menuWindow_->getMenu();
     moduleMenuItems_ = menu->addMenu("Modules");
 
     presetMenuItems_ = menu->addMenu("Presets");
@@ -286,99 +297,80 @@ void ElectraApp::setup(void) {
         appSetup.useDefault();
     }
 
-    auto window = windows_.getCurrentWindow();
+//    auto window = windows_.getCurrentWindow();
+//    unsigned ypos = 30;
+//
+//    window->addGraphics(new TextGraphics(Rectangle(0, ypos, 1024, 20), "Orac",
+//                                         TextStyle::largeWhiteOnBlack,
+//                                         TextAlign::center));
+//
+//    window->repaint();
 
-    unsigned ypos = 30;
-
-    window->addGraphics(new TextGraphics(Rectangle(0, ypos, 1024, 20), "Orac",
-                                         TextStyle::largeWhiteOnBlack,
-                                         TextAlign::center));
-
-    window->repaint();
-
-    logMessage("setup completed");
 }
 
 void ElectraApp::buttonUp(uint8_t buttonId) {
-    if (buttonId == BUTTON_RIGHT_BOTTOM) {
-        windows_.nextWindow();
-    } else {
-        auto w = currentWindow();
-        if (w) {
-            w->buttonUp(buttonId);
-        }
-    }
+    if (auto w = buttonDownWin_[buttonId]) w->buttonUp(buttonId);
+    buttonDownWin_[buttonId] = nullptr;
 }
 
 void ElectraApp::buttonLongHold(uint8_t buttonId) {
-    if (buttonId == BUTTON_RIGHT_BOTTOM) {
-        flushDebug();
-    } else {
-        auto w = currentWindow();
-        if (w) {
-            w->buttonLongHold(buttonId);
-        }
-    }
+    if (auto w = buttonDownWin_[buttonId]) w->buttonLongHold(buttonId);
 }
 
 void ElectraApp::buttonDown(uint8_t buttonId) {
     auto w = currentWindow();
-    if (w) {
-        w->buttonDown(buttonId);
-    }
+    if (w) w->buttonDown(buttonId);
+    buttonDownWin_[buttonId] = w;
 }
 
 void ElectraApp::potMove(uint8_t potId, int16_t relativeChange) {
-//    auto w = currentWindow();
-//    w->potMove(potId, relativeChange);
+    if (auto w = currentWindow()) w->potMove(potId, relativeChange);
 }
 
 void ElectraApp::potTouchDown(uint8_t potId) {
-    auto w = currentWindow();
-    w->processPotTouch(potId, true);
+    if (auto w = currentWindow()) w->potTouchDown(potId);
 }
 
 void ElectraApp::potTouchUp(uint8_t potId) {
-    auto w = currentWindow();
-    w->processPotTouch(potId, false);
+    if (auto w = currentWindow()) w->potTouchUp(potId);
 }
 
 void ElectraApp::touchDown(TouchEvent &touchEvent) {
-    if (Component *component = touchEvent.getEventComponent()) {
-        component->onTouchDown(touchEvent);
-    }
+    if (auto w = currentWindow()) w->touchDown(touchEvent);
 }
 
 void ElectraApp::touchHold(TouchEvent &touchEvent) {
-    if (Component *component = touchEvent.getEventComponent()) {
-        component->onTouchHold(touchEvent);
-    }
+    if (auto w = currentWindow()) w->touchHold(touchEvent);
 }
 
 void ElectraApp::touchUp(TouchEvent &touchEvent) {
-    if (Component *component = touchEvent.getEventComponent()) {
-        component->onTouchUp(touchEvent);
-    }
+    if (auto w = currentWindow()) w->touchUp(touchEvent);
 }
 
-void ElectraApp::touchLongHold(TouchEvent &touchEvent) {}
+void ElectraApp::touchLongHold(TouchEvent &touchEvent) {
+    if (auto w = currentWindow()) w->touchLongHold(touchEvent);
+}
 
-void ElectraApp::touchClick(TouchEvent &touchEvent) {}
+void ElectraApp::touchClick(TouchEvent &touchEvent) {
+    if (auto w = currentWindow()) w->touchClick(touchEvent);
+}
 
-void ElectraApp::touchDoubleClick(TouchEvent &touchEvent) {}
+void ElectraApp::touchDoubleClick(TouchEvent &touchEvent) {
+    if (auto w = currentWindow()) w->touchDoubleClick(touchEvent);
+}
 
 
-void ElectraApp::handleIncomingMidiMessage(MidiInput &midiInput,
-                                           MidiMessage &midiMessage) {}
+void ElectraApp::handleIncomingMidiMessage(MidiInput &midiInput, MidiMessage &midiMessage) {
+}
 
-void ElectraApp::handleIncomingSysexMessage(MidiInput &midiInput,
-                                            SysexMessage &midiMessage) {}
+void ElectraApp::handleIncomingSysexMessage(MidiInput &midiInput, SysexMessage &midiMessage) {
+}
 
 void ElectraApp::runUserTask(void) {
-//    flushDebug();
 }
 
-void ElectraApp::handleIncomingControlMessage(MidiInput &, MidiMessage &) {}
+void ElectraApp::handleIncomingControlMessage(MidiInput &, MidiMessage &) {
+}
 
 
 MidiBase *ElectraApp::getMidi(void) { return (&midi_); }
@@ -637,18 +629,19 @@ bool ElectraApp::handleE1SysEx(Kontrol::ChangeSource src,
 
 // start end of setup {
 void ElectraApp::publishStart() {
-    menuWindow_.clearMenu(moduleMenuItems_);
-    menuWindow_.clearMenu(presetMenuItems_);
+    dbgMessage("Initialising from Orac");
+    menuWindow_->clearMenu(moduleMenuItems_);
+    menuWindow_->clearMenu(presetMenuItems_);
 
     presetMenuItems_->addItem("Save Preset", [this](void) { menuPresetSave(); });
     presetMenuItems_->addItem("New Preset", [this](void) { menuPresetNew(); });
 
     //TODO , clear model?
-
 }
 
 void ElectraApp::publishEnd() {
-
+    dbgMessage("Initialisation from Orac complete");
+    windows_.select(AppWindows::MAIN);
 }
 
 // menu management
@@ -689,7 +682,7 @@ void ElectraApp::modulationLearn(bool b) {
 // menu items
 void ElectraApp::menuPresetNew() {
     auto model = Kontrol::KontrolModel::model();
-    auto orack = mainWindow().getActiveRack();
+    auto orack = mainWindow()->getActiveRack();
     if (orack) {
         auto rackId = orack->rackId();
         auto pRack = model->getRack(rackId);
@@ -706,7 +699,7 @@ void ElectraApp::menuPresetNew() {
 
 void ElectraApp::menuPresetSave() {
     auto model = Kontrol::KontrolModel::model();
-    auto orack = mainWindow().getActiveRack();
+    auto orack = mainWindow()->getActiveRack();
     if (orack) {
         auto rackId = orack->rackId();
         auto pRack = model->getRack(rackId);
@@ -734,7 +727,7 @@ void ElectraApp::menuMidiLearn() {
 
 void ElectraApp::menuSaveSettings() {
     auto model = Kontrol::KontrolModel::model();
-    auto orack = mainWindow().getActiveRack();
+    auto orack = mainWindow()->getActiveRack();
     if (orack) {
         model->saveSettings(Kontrol::CS_LOCAL, orack->rackId());
         windows_.select(AppWindows::MAIN);
@@ -755,7 +748,7 @@ void ElectraApp::menuModuleSelect() {
                 std::string module = catItem->name_ + "/" + modItem->name_;
                 dbgMessage("moduleSelect : module %s", module.c_str());
 
-                auto orack = mainWindow().getActiveRack();
+                auto orack = mainWindow()->getActiveRack();
                 if (orack) {
                     auto omod = orack->getActiveModule();
                     if (omod) {
@@ -768,7 +761,7 @@ void ElectraApp::menuModuleSelect() {
             // for some reason we have module in top level
             std::string module = catItem->name_;
             dbgMessage("moduleSelect : module %s (no cat) ", module.c_str());
-            auto orack = mainWindow().getActiveRack();
+            auto orack = mainWindow()->getActiveRack();
             if (orack) {
                 auto omod = orack->getActiveModule();
                 if (omod) {
@@ -787,7 +780,7 @@ void ElectraApp::menuPresetSelect() {
         std::string preset = pItem->name_;
 //        dbgMessage("presetSelect : preset %s", preset.c_str());
 
-        auto rackId = mainWindow().getActiveRack()->rackId();
+        auto rackId = mainWindow()->getActiveRack()->rackId();
         auto model = Kontrol::KontrolModel::model();
         model->loadPreset(Kontrol::CS_LOCAL, rackId, preset);
         windows_.select(AppWindows::MAIN);

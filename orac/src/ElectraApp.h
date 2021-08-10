@@ -8,16 +8,17 @@
 
 
 #include "Components/TextComponent.h"
-#include "Windows/AppWindows.h"
-#include "Windows/MainWindow.h"
-#include "Windows/MenuWindow.h"
 
+
+class MainWindow;
+class MenuWindow;
+struct MenuItem;
+//class DebugWindow;
+
+#include "Windows/AppWindows.h"
 #include "Electra.h"
 #include "SysExStream.h"
-
-#include "Debug.h"
 #include "IUICallback.h"
-
 
 class E1KontrolCallback;
 
@@ -51,6 +52,7 @@ public:
     void runUserTask() override;
 
     Windows *getWindows() override { return (&windows_); }
+    AppWindows *getAppWindows() { return (&windows_); }
 
     MidiBase *getMidi() override;
 
@@ -58,8 +60,7 @@ public:
 
     OWindow *currentWindow() { return windows_.current(); }
 
-    MainWindow &mainWindow() { return mainWindow_; }
-
+    MainWindow *mainWindow() { return mainWindow_.get(); }
 
     void publishStart();
     void publishEnd();
@@ -105,11 +106,13 @@ private:
     bool midiLearnActive_ = false;
     bool modulationLearnActive_ = false;
 
-    MainWindow mainWindow_;
-    MenuWindow menuWindow_;
-    DebugWindow debugWindow_;
+    std::shared_ptr<MainWindow> mainWindow_;
+    std::shared_ptr<MenuWindow> menuWindow_;
+//    std::shared_ptr<DebugWindow> debugWindow_;
     AppWindows windows_;
-    std::shared_ptr<MenuWindow::MenuItem> moduleMenuItems_;
-    std::shared_ptr<MenuWindow::MenuItem> presetMenuItems_;
+    std::shared_ptr<MenuItem> moduleMenuItems_;
+    std::shared_ptr<MenuItem> presetMenuItems_;
     MidiBase midi_;
+
+    OWindow* buttonDownWin_[NR_OF_HW_BUTTONS] = {nullptr, nullptr, nullptr, nullptr, nullptr, nullptr};
 };

@@ -4,6 +4,9 @@
 
 #include <Buttons.h>
 
+//TODO : avoid using electrapp !
+#include "ElectraApp.h"
+
 //logMessage
 #include <helpers.h>
 
@@ -77,9 +80,27 @@ void DebugWindow::paint() {
 }
 
 void DebugWindow::buttonUp(uint8_t buttonId) {
-    if (buttonId == BUTTON_LEFT_TOP) {
-        dbgBuf_.reset();
-        repaint();
+    if(isButtonHandled(buttonId) || !isVisible()) return;
+    OWindow::buttonUp(buttonId);
+
+    switch (buttonId) {
+        case BUTTON_LEFT_TOP: {
+            dbgBuf_.reset();
+            repaint();
+            break;
+        }
+        case BUTTON_LEFT_BOTTOM: {
+            flushDebug();
+            break;
+        }
+        case BUTTON_RIGHT_BOTTOM : {
+            // TODO : improve, don't use cast
+            auto eapp = static_cast<ElectraApp *>(app);
+            eapp->getAppWindows()->select(AppWindows::MAIN);
+            break;
+        }
+        default: {
+        }
     }
 }
 

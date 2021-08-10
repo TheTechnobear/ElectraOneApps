@@ -20,29 +20,64 @@ public:
     }
 
     //IUICallback
-    void touchDown(TouchEvent &touchEvent) override {}
+    void touchDown(TouchEvent &touchEvent) override {
+        if (auto c = touchEvent.getEventComponent()) {
+            c->onTouchDown(touchEvent);
+        }
+    }
 
-    void touchUp(TouchEvent &touchEvent) override {}
+    void touchUp(TouchEvent &touchEvent) override {
+        if (auto c = touchEvent.getEventComponent()) {
+            c->onTouchHold(touchEvent);
+        }
+    }
 
-    void touchHold(TouchEvent &touchEvent) override {}
+    void touchHold(TouchEvent &touchEvent) override {
+        if (auto c = touchEvent.getEventComponent()) {
+            c->onTouchUp(touchEvent);
+        }
+    }
 
-    void touchLongHold(TouchEvent &touchEvent) override {}
+    void touchLongHold(TouchEvent &touchEvent) override {
+        if (auto c = touchEvent.getEventComponent()) {
+            c->onTouchLongHold(touchEvent);
+        }
+    }
 
-    void touchClick(TouchEvent &touchEvent) override {}
+    void touchClick(TouchEvent &touchEvent) override {
+        if (auto c = touchEvent.getEventComponent()) {
+            c->onTouchClick(touchEvent);
+        }
+    }
 
-    void touchDoubleClick(TouchEvent &touchEvent) override {}
+    void touchDoubleClick(TouchEvent &touchEvent) override {
+        if (auto c = touchEvent.getEventComponent()) {
+            c->onTouchDoubleClick(touchEvent);
+        }
+    }
 
-    void potTouchDown(uint8_t potId) override {}
+    void potTouchDown(uint8_t potId) override {
+        processPotTouch(potId, true);
+    }
 
-    void potTouchUp(uint8_t potId) override {}
+    void potTouchUp(uint8_t potId) override {
+        processPotTouch(potId, false);
+    }
 
-    void potMove(uint8_t potId, int16_t relativeChange) override {}
+    void potMove(uint8_t potId, int16_t relativeChange) override {
+        processPot(potId, relativeChange);
+    }
 
-    void buttonUp(uint8_t buttonId) override {}
+    void buttonUp(uint8_t buttonId) override {
+        buttonHandled(buttonId);
+    }
 
-    void buttonDown(uint8_t buttonId) override {}
+    void buttonDown(uint8_t buttonId) override {
+        buttonReset(buttonId);
+    }
 
-    void buttonLongHold(uint8_t buttonId) override {};
+    void buttonLongHold(uint8_t buttonId) override {
+    }
 
     // Graphics
     void visibilityChanged() override {
@@ -52,6 +87,24 @@ public:
         }
     }
 
+    // button handling
+    void buttonReset(uint8_t buttonId) {
+        int mask = 1 << buttonId;
+        processRelease_ |= mask;
+    }
+
+    void buttonHandled(uint8_t buttonId) {
+        int mask = 1 << buttonId;
+        processRelease_ &= ~mask;
+    }
+
+    bool isButtonHandled(uint8_t buttonId) {
+        int mask = 1 << buttonId;
+        return !(processRelease_ & mask);
+    }
+
 protected:
+    int processRelease_ = 0x0;
+
     ~OWindow() {}
 };
