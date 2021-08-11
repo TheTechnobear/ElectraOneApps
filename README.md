@@ -34,7 +34,7 @@ then from firmware directory you will need to do something like..
 
 
 `
-make "TOOLSPATH=${HOME}/projects/E1/tools" COMPILERPATH="/opt/homebrew/bin" APPPATH="../OracE1Firmware/orac" BUILDDIR="../OracE1Firmware/build"
+make "TOOLSPATH=${HOME}/projects/E1/tools" COMPILERPATH="/opt/homebrew/bin" APPPATH="../ElectraOneApps/orac" BUILDDIR="../ElectraOneApps/build"
 `
 
 
