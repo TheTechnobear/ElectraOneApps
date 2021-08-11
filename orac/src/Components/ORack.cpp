@@ -89,7 +89,6 @@ void OracRack::moved() {
 }
 
 void OracRack::onPotChange(int16_t relativeChange, handle_t handle) {
-    dbgMessage("OracRack::onPotChange %d, %d", handle, relativeChange);
     if (displayIdx_ < displayOrder_.size()) {
         auto id = displayOrder_[displayIdx_];
         if (modules_.count(id) > 0) {
