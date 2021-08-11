@@ -510,7 +510,7 @@ void ElectraApp::menuModuleSelect() {
             unsigned midx = catItem->idx_;
             if (midx < catItem->items_.size()) {
                 auto modItem = catItem->items_[midx];
-                std::string module = catItem->name_ + "/" + modItem->name_;
+                std::string module = catItem->name_ + modItem->name_;
                 dbgMessage("moduleSelect : module %s", module.c_str());
 
                 auto orack = mainWindow()->getActiveRack();
