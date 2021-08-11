@@ -6,19 +6,19 @@
 
 
 void MainWindow::potMove(uint8_t potId, int16_t relativeChange) {
-    if (potId == 0) {
-        if (buttonState_[BUTTON_LEFT_TOP]) {
-            buttonHandled(BUTTON_LEFT_TOP);
+    if (buttonState_[BUTTON_LEFT_TOP]) {
+        if (potId == 0) {
             if (!getActiveRack()) return;
+            buttonHandled(BUTTON_LEFT_TOP);
 
             if (relativeChange > 0)
                 getActiveRack()->nextDisplay();
             else
                 getActiveRack()->prevDisplay();
             return;
-        } else if (buttonState_[BUTTON_LEFT_MIDDLE]) {
-            buttonHandled(BUTTON_LEFT_MIDDLE);
+        } else if (potId == 1) {
             if (!getActiveRack() || !getActiveRack()->getActiveModule()) return;
+            buttonHandled(BUTTON_LEFT_TOP);
 
             if (relativeChange > 0)
                 getActiveRack()->getActiveModule()->nextDisplay();
@@ -31,10 +31,8 @@ void MainWindow::potMove(uint8_t potId, int16_t relativeChange) {
 }
 
 void MainWindow::potTouchUp(uint8_t potId) {
-    if (potId == 0) {
+    if (potId == 0 || potId == 1) {
         if (buttonState_[BUTTON_LEFT_TOP]) {
-            return;
-        } else if (buttonState_[BUTTON_LEFT_MIDDLE]) {
             return;
         }
     }
@@ -42,10 +40,8 @@ void MainWindow::potTouchUp(uint8_t potId) {
 }
 
 void MainWindow::potTouchDown(uint8_t potId) {
-    if (potId == 0) {
+    if (potId == 0 || potId == 1) {
         if (buttonState_[BUTTON_LEFT_TOP]) {
-            return;
-        } else if (buttonState_[BUTTON_LEFT_MIDDLE]) {
             return;
         }
     }

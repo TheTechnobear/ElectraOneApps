@@ -20,7 +20,7 @@ void OracPage::paint() {
         screen.printText(screenX + 1, screenY + 1, name.c_str(),
                          TextStyle::smallWhiteOnBlack, width - 2,
                          TextAlign::center);
-        if (isActive()) {
+        if (parent_->isActive() && isActive()) {
             screen.drawLine(screenX + 30, screenY + 18, width - 60, 0, COLOR_WHITE);
         }
     }
