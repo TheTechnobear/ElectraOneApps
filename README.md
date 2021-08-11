@@ -26,7 +26,7 @@ if you want to make it work, I'd love a PR  :)
 
 
 
-#orac
+# orac
 to connect to Orac (via MEC)
 
 for building download electra.one firmware sdk
@@ -36,3 +36,14 @@ then from firmware directory you will need to do something like..
 `
 make "TOOLSPATH=${HOME}/projects/E1/tools" COMPILERPATH="/opt/homebrew/bin" APPPATH="../OracE1Firmware/orac" BUILDDIR="../OracE1Firmware/build"
 `
+
+
+released version of Orac will work
+
+but you will need a recent build of MEC, (currently electraone.1 branch)  
+see 
+https://github.com/thetechnobear/MEC/
+
+
+run orac, then run mec-app, using e1kontrol.json
+config file might need change depending upon your midi setup , as it details the electra one control port
