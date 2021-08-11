@@ -14,19 +14,22 @@ void OracParam::paint() {
 
     if (param) {
         unsigned bw = width - 15;
-        screen.fillRoundRect(screenX + 7, screenY + 5, bw, 24, 3, COLOR_WHITE);
+        unsigned bh = 24;
+        screen.fillRoundRect(screenX + 7, screenY + 5, bw, bh, 3, ElectraColours::getNumericRgb565Darker(ElectraColours::white));
 
         float value = param->asFloat(param->current());
         auto vw = static_cast<unsigned>(float(bw) * value);
         static constexpr unsigned minW = 6;
         if (vw <= minW) vw = minW;
 
-        screen.fillRoundRect(screenX + 7, screenY + 5, vw, 24, 3, fgClr_);
+        screen.fillRoundRect(screenX + 7, screenY + 5, vw, bh, 3, fgClr_);
+
+        auto vstr = param->displayValue();
+        screen.printText(screenX + 17, screenY + 10, vstr.c_str(), TextStyle::mediumTransparent, bw - 20, TextAlign::left);
 
         screen.printText(screenX, screenY + height - 20,
                          param->displayName().c_str(),
-                         TextStyle::smallWhiteOnBlack, width,
-                         TextAlign::center);
+                         TextStyle::smallWhiteOnBlack, width, TextAlign::center);
     }
 }
 

@@ -39,7 +39,7 @@ void OracPage::initParams() {
 
     int pos = 0;
     const unsigned w = (width - 25) / 2;
-    const unsigned h = (height - 30) / 2;
+    const unsigned h = (height - 20) / 2;
     for (auto param : params) {
         auto ctrl = std::make_shared<OracParam>(*rack, *module, *param, this);
         params_.push_back(ctrl);

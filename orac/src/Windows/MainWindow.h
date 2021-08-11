@@ -19,10 +19,7 @@ public:
         doNotUseControlSets();
     }
 
-    void paint() override {
-        screen.fillRect(screenX, screenY, width, height, COLOR_BLACK);
-        Window::paint();
-    }
+    void paint() override;
 
     void addRack(const Kontrol::Rack &r);
 
@@ -60,7 +57,20 @@ public:
 
     void potMove(uint8_t potId, int16_t relativeChange) override;
 
+
+    enum EditMode {
+        NORMAL,
+        MIDI_LEARN,
+        MOD_LEARN,
+        MAX_MODE
+    };
+
+    void nextMode();
+    void resetMode();
+
 private:
+    EditMode editMode_=NORMAL;
+
     bool buttonState_[NR_OF_HW_BUTTONS] = {false, false, false, false, false, false};
     std::map<Kontrol::EntityId, std::shared_ptr<OracRack>> racks_;
 };
