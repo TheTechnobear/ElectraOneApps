@@ -124,6 +124,7 @@ void ModuleWindow::select(const std::string &m) {
     curMenu_->idx_ = 0;
     curMenu_->offset_ = 0;
     size_t pos = m.find('/');
+//    dbgMessage("ModuleWindow::select %s", m.c_str());
     if (pos == std::string::npos) {
         // module at top level
         int idx = curMenu_->findIdx(m);
@@ -133,7 +134,8 @@ void ModuleWindow::select(const std::string &m) {
         }
     } else {
         std::string cat = m.substr(0, pos + 1);
-        std::string mod = m.substr(pos + 2);
+        std::string mod = m.substr(pos + 1);
+//        dbgMessage("ModuleWindow::select %s %s %d", cat.c_str(), mod.c_str(), pos);
 
         auto catmenu = curMenu_->find(cat);
         if (!catmenu) {
@@ -142,6 +144,7 @@ void ModuleWindow::select(const std::string &m) {
 
         // select cat
         int idx = curMenu_->findIdx(cat);
+//        dbgMessage("ModuleWindow::select cat  %s %s %d", cat.c_str(), mod.c_str(), idx);
         if (idx >= 0) {
             curMenu_->idx_ = idx;
             if (curMenu_->idx_ >= MAX_DISPLAY) curMenu_->offset_ = curMenu_->idx_;
@@ -150,6 +153,7 @@ void ModuleWindow::select(const std::string &m) {
 
         // select module
         idx = curMenu_->findIdx(mod);
+//        dbgMessage("ModuleWindow::select mod %s %s %d", cat.c_str(), mod.c_str(), idx);
         if (idx >= 0) {
             curMenu_->idx_ = idx;
             if (curMenu_->idx_ >= MAX_DISPLAY) curMenu_->offset_ = curMenu_->idx_;
