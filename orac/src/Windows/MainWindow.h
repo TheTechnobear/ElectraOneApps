@@ -38,10 +38,7 @@ public:
         return nullptr;
     }
 
-    void buttonDown(uint8_t buttonId) override {
-        OWindow::buttonDown(buttonId);
-        buttonState_[buttonId] = true;
-    }
+    void buttonDown(uint8_t buttonId) override;
 
     void buttonLongHold(uint8_t buttonId) override;
 
@@ -69,8 +66,13 @@ public:
     void resetMode();
 
 private:
-    EditMode editMode_=NORMAL;
+    void enableSleepMode();
+    void disableSleepMode();
+
+    bool sleepMode_= false;
+    EditMode editMode_ = NORMAL;
 
     bool buttonState_[NR_OF_HW_BUTTONS] = {false, false, false, false, false, false};
+    bool buttonLongHold_[NR_OF_HW_BUTTONS] = {false, false, false, false, false, false};
     std::map<Kontrol::EntityId, std::shared_ptr<OracRack>> racks_;
 };

@@ -48,10 +48,28 @@ void MainWindow::potTouchDown(uint8_t potId) {
     OWindow::potTouchDown(potId);
 }
 
+
+void MainWindow::buttonDown(uint8_t buttonId) {
+    OWindow::buttonDown(buttonId);
+    buttonState_[buttonId] = true;
+    buttonLongHold_[buttonId] = false;
+}
+
+void MainWindow::buttonLongHold(uint8_t buttonId) {
+    OWindow::buttonLongHold(buttonId);
+    buttonLongHold_[buttonId] = true;
+}
+
+
 void MainWindow::buttonUp(uint8_t buttonId) {
+
     buttonState_[buttonId] = false;
     if (isButtonHandled(buttonId) || !isVisible()) return;
     OWindow::buttonUp(buttonId);
+
+    if(sleepMode_ && buttonId!=BUTTON_RIGHT_BOTTOM) {
+        return;
+    }
 
     switch (buttonId) {
         case BUTTON_LEFT_TOP : {
@@ -61,7 +79,14 @@ void MainWindow::buttonUp(uint8_t buttonId) {
             break;
         }
         case BUTTON_LEFT_BOTTOM: {
-            nextMode();
+            if (buttonLongHold_[BUTTON_RIGHT_BOTTOM]) {
+                // standby mode
+                buttonHandled(BUTTON_RIGHT_BOTTOM);
+                buttonLongHold_[BUTTON_RIGHT_BOTTOM]=false;
+                enableSleepMode();
+            } else {
+                nextMode();
+            }
             break;
         }
         case BUTTON_RIGHT_TOP : {
@@ -78,12 +103,22 @@ void MainWindow::buttonUp(uint8_t buttonId) {
             break;
         }
         case BUTTON_RIGHT_BOTTOM: {
+            if (buttonLongHold_[buttonId]) {
+                if(sleepMode_) {
+                    disableSleepMode();
+                }
+                else {
+                    auto eapp = static_cast<ElectraApp *>(app);
+                    eapp->getAppWindows()->select(AppWindows::DEBUG);
+                }
+            }
             break;
         }
         default: {
             break;
         }
     }
+    buttonLongHold_[buttonId] = false;
 }
 
 void MainWindow::addRack(const Kontrol::Rack &r) {
@@ -107,16 +142,6 @@ void MainWindow::addRack(const Kontrol::Rack &r) {
     }
 }
 
-void MainWindow::buttonLongHold(uint8_t buttonId) {
-    OWindow::buttonLongHold(buttonId);
-    if (buttonId == BUTTON_RIGHT_BOTTOM) {
-        buttonHandled(buttonId);
-
-        // TODO : improve, don't use cast
-        auto eapp = static_cast<ElectraApp *>(app);
-        eapp->getAppWindows()->select(AppWindows::DEBUG);
-    }
-}
 
 void MainWindow::paint() {
     screen.fillRect(screenX, screenY, width, height, COLOR_BLACK);
@@ -175,3 +200,27 @@ void MainWindow::resetMode() {
 }
 
 
+void MainWindow::enableSleepMode() {
+    for (int i = 0; i < 16000; i += 128) {
+        screen.setBacklightbrightness(i);
+        delay(10);
+    }
+    screen.setBacklightbrightness(65535);
+    sleepMode_=true;
+}
+
+void MainWindow::disableSleepMode() {
+    logMessage("hardwareButtonLambda: switch LCD on");
+    sleepMode_=false;
+    repaint();
+
+    delay(50);
+    screen.setBacklightbrightness(0);
+    delay(150);
+
+    capSense.reset();
+
+    if (!capSense.init()) {
+        logMessage("capacitive sensing: cannot calibrate. Check input USB voltage");
+    }
+}
