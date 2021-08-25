@@ -95,11 +95,10 @@ public:
 
     void clearBackground() {
         screen.fillRect(screenX, screenY, width, height, bgClr_);
-//        screen.fillRect(screenX, screenY, width - 1, height - 1, bgClr_);
     }
 
     void drawBorder() {
-        screen.drawRect(screenX, screenY, width - 1, height - 1, fgClr_);
+        screen.drawRect(screenX, screenY, width, height, fgClr_);
     }
 
     void setFgColour(uint16_t clr) { fgClr_ = clr; }

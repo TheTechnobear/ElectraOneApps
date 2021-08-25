@@ -21,16 +21,17 @@ void OracPage::paint() {
                          TextStyle::smallWhiteOnBlack, width - 2,
                          TextAlign::center);
         if (parent_->isActive() && isActive()) {
-            screen.drawLine(screenX + 30, screenY + 18, width - 60, 0, COLOR_WHITE);
+            screen.drawLine(screenX + 30, screenY + 18, screenX + width - 60, screenY + 18 , COLOR_WHITE);
         }
     }
 
     if (active_) {
-        // screen.drawLine(screenX - 1, screenY - 1, width, 1, 0xFFFF);
+        // screen.drawLine(screenX - 1, screenY - 1, screenX - 1 + width, screenY - 1, 0xFFFF);
     }
 }
 
 void OracPage::initParams() {
+
     auto rack = model_->getRack(rackId_);
     auto module = model_->getModule(rack, moduleId_);
     auto page = model_->getPage(module, pageId_);

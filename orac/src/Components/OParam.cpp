@@ -19,7 +19,7 @@ void OracParam::paint() {
 
         float value = param->asFloat(param->current());
         auto vw = static_cast<unsigned>(float(bw) * value);
-        static constexpr unsigned minW = 6;
+        static constexpr unsigned minW = 10;
         if (vw <= minW) vw = minW;
 
         screen.fillRoundRect(screenX + 7, screenY + 5, vw, bh, 3, fgClr_);
