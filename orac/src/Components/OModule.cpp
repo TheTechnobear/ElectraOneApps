@@ -11,16 +11,15 @@ void OracModule::paint() {
     auto rack = model_->getRack(rackId_);
     auto module = model_->getModule(rack, moduleId_);
     if (rack && module) {
-        screen.printText(screenX + 10, screenY + 10, module->id().c_str(), TextStyle::smallWhiteOnBlack, width, TextAlign::left);
+        screen.printText(10, 10, module->id().c_str(), TextStyle::smallWhiteOnBlack, width, TextAlign::left);
 
         if (module->displayName().length() < 6) {
-            screen.printText(screenX + 10, screenY + 50, module->displayName().c_str(), TextStyle::smallWhiteOnBlack, width, TextAlign::left);
+            screen.printText(10, 50, module->displayName().c_str(), TextStyle::smallWhiteOnBlack, width, TextAlign::left);
         } else {
             std::string s1 = module->displayName().substr(0, 5);
             std::string s2 = module->displayName().substr(5);
-            screen.printText(screenX + 10, screenY + 50, s1.c_str(), TextStyle::smallWhiteOnBlack, width, TextAlign::left);
-            screen.printText(screenX + 10, screenY + 70, s2.c_str(), TextStyle::smallWhiteOnBlack, width, TextAlign::left);
-
+            screen.printText(10, 50, s1.c_str(), TextStyle::smallWhiteOnBlack, width, TextAlign::left);
+            screen.printText(10, 70, s2.c_str(), TextStyle::smallWhiteOnBlack, width, TextAlign::left);
         }
     }
 }
@@ -42,7 +41,6 @@ void OracModule::onPotChange(int16_t relativeChange, handle_t handle) {
 }
 
 void OracModule::addPage(const Kontrol::Rack &r, const Kontrol::Module &m, const Kontrol::Page &p) {
-
     if (r.id() != rackId_) { dbgMessage("ASSERT OracModule::addPage - invalid rack"); }
     if (m.id() != moduleId_) { dbgMessage("ASSERT OracModule::addPage - invalid module"); }
 
@@ -88,7 +86,7 @@ void OracModule::scrollView() {
     unsigned idx = 0;
 //        unsigned h = height - 20;
     unsigned w = (width - 60) / MAX_DISPLAY;
-    for (const auto& id: displayOrder_) {
+    for (const auto &id: displayOrder_) {
         bool vis = idx >= displayOffset_ && (idx < displayOffset_ + MAX_DISPLAY);
         bool act = vis && (idx == displayIdx_);
         if (pages_.count(id) > 0) {

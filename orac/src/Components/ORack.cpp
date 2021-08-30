@@ -35,12 +35,12 @@ void OracRack::addModule(const Kontrol::Rack &r, const Kontrol::Module &m) {
 
 void OracRack::paint() {
     clearBackground();
+//    drawBorder();
     OComponent::paint();
 
-//        drawBorder();
     auto rack = model_->getRack(rackId_);
     if (rack) {
-//            screen.printText(screenX , screenY + 2 , rack->displayName().c_str(), TextStyle::smallWhiteOnBlack, width , TextAlign::center);
+//            screen.printText(0 , 2 , rack->displayName().c_str(), TextStyle::smallWhiteOnBlack, width , TextAlign::center);
     }
 }
 

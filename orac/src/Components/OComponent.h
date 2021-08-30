@@ -62,8 +62,19 @@ public:
         if (isVisible()) {
             for (auto &c : children_) {
 //                if (c->isVisible()) c->repaint();
-                if (c->isVisible()) c->paint();
+
+                if (c->isVisible()) {
+                    Rectangle bounds = c->getBounds();
+                    screen.setActiveWindowPosition(bounds.x, bounds.y);
+                    screen.setActiveWindowSize(bounds.width, bounds.height);
+                    c->paint();
+                }
             }
+
+            Rectangle bounds = getBounds();
+            screen.setActiveWindowPosition(bounds.x, bounds.y);
+            screen.setActiveWindowSize(bounds.width, bounds.height);
+
         }
     }
 
@@ -94,11 +105,11 @@ public:
     void add(const std::shared_ptr<OComponent> &c) { children_.push_back(c); }
 
     void clearBackground() {
-        screen.fillRect(screenX, screenY, width, height, bgClr_);
+        screen.fillRect(0, 0, width, height, bgClr_);
     }
 
     void drawBorder() {
-        screen.drawRect(screenX, screenY, width, height, fgClr_);
+        screen.drawRect(0, 0, width, height, fgClr_);
     }
 
     void setFgColour(uint16_t clr) { fgClr_ = clr; }

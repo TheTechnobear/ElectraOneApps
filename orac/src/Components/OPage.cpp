@@ -12,21 +12,21 @@ void OracPage::paint() {
     auto module = model_->getModule(rack, moduleId_);
     auto page = model_->getPage(module, pageId_);
 
-//        drawBorder();
+//    drawBorder();
 
     if (page) {
         auto &name = page->displayName();
 
-        screen.printText(screenX + 1, screenY + 1, name.c_str(),
+        screen.printText(1, 1, name.c_str(),
                          TextStyle::smallWhiteOnBlack, width - 2,
                          TextAlign::center);
         if (parent_->isActive() && isActive()) {
-            screen.drawLine(screenX + 30, screenY + 18, screenX + width - 60, screenY + 18 , COLOR_WHITE);
+            screen.drawLine(30, 18, width - 60, 18, COLOR_WHITE);
         }
     }
 
     if (active_) {
-        // screen.drawLine(screenX - 1, screenY - 1, screenX - 1 + width, screenY - 1, 0xFFFF);
+        // screen.drawLine(1, 1, 1 + width, 1, 0xFFFF);
     }
 }
 

@@ -131,7 +131,7 @@ void MainWindow::addRack(const Kontrol::Rack &r) {
             // we only ever have one rack!
             unsigned header = 40; // status bar = 15
 
-            rack->setBounds(screenX, screenY + header, width, height - header - 30);
+            rack->setBounds(screenX, screenY + header, width - 1, height - header - 30);
             addComponent(rack.get());
             for (unsigned enc = 0; enc < 12; enc++) {
                 assignPot(enc, 0, rack.get(), enc);
