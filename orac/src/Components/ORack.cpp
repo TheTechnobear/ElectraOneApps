@@ -33,14 +33,14 @@ void OracRack::addModule(const Kontrol::Rack &r, const Kontrol::Module &m) {
     }
 }
 
-void OracRack::paint() {
-    clearBackground();
+void OracRack::paint(Graphics& g) {
+    clearBackground(g);
 //    drawBorder();
-    OComponent::paint();
+    OComponent::paint(g);
 
     auto rack = model_->getRack(rackId_);
     if (rack) {
-//            screen.printText(0 , 2 , rack->displayName().c_str(), TextStyle::smallWhiteOnBlack, width , TextAlign::center);
+//            g.printText(0 , 2 , rack->displayName().c_str(), TextStyle::smallWhiteOnBlack, width , TextAlign::center);
     }
 }
 

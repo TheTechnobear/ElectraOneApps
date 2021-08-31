@@ -73,14 +73,14 @@ public:
     }
 
 
-    void paint() override {
-        screen.fillRect(screenX, screenY, width, height, COLOR_BLACK);
-        Window::paint();
+    void paint(Graphics& g) override {
+        g.fillRect(screenX, screenY, width, height, COLOR_BLACK);
+        Window::paint(g);
 
-        paintMenu(curMenu_);
+        paintMenu(g, curMenu_);
     }
 
-    void paintMenu(MenuItem *m);
+    void paintMenu(Graphics& g,MenuItem *m);
 
     std::shared_ptr<MenuItem> getMenu() { return topMenu_; }
 

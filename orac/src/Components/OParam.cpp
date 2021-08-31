@@ -1,11 +1,11 @@
 #include "OParam.h"
 
-void OracParam::paint() {
+void OracParam::paint(Graphics &g) {
 //        dbgMessage("paint param %s", (moduleId_+":"+paramId_).c_str());
-    clearBackground();
-    OComponent::paint();
+    clearBackground(g);
+    OComponent::paint(g);
 
-//        drawBorder();
+//        drawBorder(g);
 
     auto rack = model_->getRack(rackId_);
     auto module = model_->getModule(rack, moduleId_);
@@ -15,21 +15,21 @@ void OracParam::paint() {
     if (param) {
         unsigned bw = width - 15;
         unsigned bh = 24;
-        screen.fillRoundRect(7, 5, bw, bh, 3, ElectraColours::getNumericRgb565Darker(ElectraColours::white));
+        g.fillRoundRect(7, 5, bw, bh, 3, ElectraColours::getNumericRgb565Darker(ElectraColours::white));
 
         float value = param->asFloat(param->current());
         auto vw = static_cast<unsigned>(float(bw) * value);
         static constexpr unsigned minW = 10;
         if (vw <= minW) vw = minW;
 
-        screen.fillRoundRect(7, 5, vw, bh, 3, fgClr_);
+        g.fillRoundRect(7, 5, vw, bh, 3, fgClr_);
 
         auto vstr = param->displayValue();
-        screen.printText(17, 10, vstr.c_str(), TextStyle::mediumTransparent, bw - 20, TextAlign::left);
+        g.printText(17, 10, vstr.c_str(), TextStyle::mediumTransparent, bw - 20, TextAlign::left);
 
-        screen.printText(0, height - 20,
-                         param->displayName().c_str(),
-                         TextStyle::smallWhiteOnBlack, width, TextAlign::center);
+        g.printText(0, height - 20,
+                    param->displayName().c_str(),
+                    TextStyle::smallWhiteOnBlack, width, TextAlign::center);
     }
 }
 

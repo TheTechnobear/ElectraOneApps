@@ -13,7 +13,7 @@ public:
                          bool newPinOptionAvailable = false,
                          bool newWindowPinned = false);
 
-    void paint() override;
+    void paint(Graphics& g) override;
 
     void buttonUp(uint8_t buttonId) override;
     static DebugWindow *debugWindow();

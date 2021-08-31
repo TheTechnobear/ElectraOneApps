@@ -56,7 +56,7 @@ public:
         }
     }
 
-    void paint() override {
+    void paint(Graphics& g) override {
         if (parent_ && !parent_->isVisible()) return;
 
         if (isVisible()) {
@@ -65,15 +65,15 @@ public:
 
                 if (c->isVisible()) {
                     Rectangle bounds = c->getBounds();
-                    screen.setActiveWindowPosition(bounds.x, bounds.y);
-                    screen.setActiveWindowSize(bounds.width, bounds.height);
-                    c->paint();
+                    g.setActiveWindowPosition(bounds.x, bounds.y);
+                    g.setActiveWindowSize(bounds.width, bounds.height);
+                    c->paint(g);
                 }
             }
 
             Rectangle bounds = getBounds();
-            screen.setActiveWindowPosition(bounds.x, bounds.y);
-            screen.setActiveWindowSize(bounds.width, bounds.height);
+            g.setActiveWindowPosition(bounds.x, bounds.y);
+            g.setActiveWindowSize(bounds.width, bounds.height);
 
         }
     }
@@ -104,12 +104,12 @@ public:
     // -------------------
     void add(const std::shared_ptr<OComponent> &c) { children_.push_back(c); }
 
-    void clearBackground() {
-        screen.fillRect(0, 0, width, height, bgClr_);
+    void clearBackground(Graphics& g) {
+        g.fillRect(0, 0, width, height, bgClr_);
     }
 
-    void drawBorder() {
-        screen.drawRect(0, 0, width, height, fgClr_);
+    void drawBorder(Graphics& g) {
+        g.drawRect(0, 0, width, height, fgClr_);
     }
 
     void setFgColour(uint16_t clr) { fgClr_ = clr; }

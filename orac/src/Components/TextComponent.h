@@ -19,9 +19,9 @@ public:
         repaint();
     }
 
-    void paint() override {
-        OComponent::paint();
-        screen.printText(screenX, screenY, label, TextStyle::smallWhiteOnBlack,
+    void paint(Graphics& g) override {
+        OComponent::paint(g);
+        g.printText(screenX, screenY, label, TextStyle::smallWhiteOnBlack,
                          width, TextAlign::center);
     }
 

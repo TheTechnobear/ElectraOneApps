@@ -23,7 +23,7 @@ public:
 
     void initParams();
 
-    void paint() override;
+    void paint(Graphics& g) override;
 
     void onPotChange(int16_t relativeChange, handle_t enc) override {
         if (enc < params_.size()) {

@@ -143,9 +143,9 @@ void MainWindow::addRack(const Kontrol::Rack &r) {
 }
 
 
-void MainWindow::paint() {
-    screen.fillRect(screenX, screenY, width, height, COLOR_BLACK);
-    Window::paint();
+void MainWindow::paint(Graphics& g) {
+    g.fillRect(screenX, screenY, width, height, COLOR_BLACK);
+    Window::paint(g);
 
     static std::string mode_str[MAX_MODE] = {
         "",
@@ -154,7 +154,7 @@ void MainWindow::paint() {
     };
 
     auto &mode = mode_str[editMode_];
-    screen.printText(screenX + 20, screenY + height - 30, mode.c_str(), TextStyle::mediumWhiteOnBlack, width, TextAlign::left);
+    g.printText(screenX + 20, screenY + height - 30, mode.c_str(), TextStyle::mediumWhiteOnBlack, width, TextAlign::left);
 }
 
 void MainWindow::nextMode() {

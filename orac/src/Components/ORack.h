@@ -17,7 +17,7 @@ public:
 
     Kontrol::EntityId rackId() { return rackId_; }
 
-    void paint() override;
+    void paint(Graphics& g) override;
 
     void onPotChange(int16_t relativeChange, handle_t handle) override;
 

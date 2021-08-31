@@ -95,7 +95,7 @@ void MenuWindow::select() {
     }
 }
 
-void MenuWindow::paintMenu(MenuItem *m) {
+void MenuWindow::paintMenu(Graphics& g,MenuItem *m) {
     unsigned x = screenX + 40;
     unsigned y = screenY + 40;
 
@@ -103,9 +103,9 @@ void MenuWindow::paintMenu(MenuItem *m) {
     for (unsigned idx = m->offset_; idx < last; idx++) {
         auto i = m->items_[idx];
         if (idx == m->idx_) {
-            screen.printText(x, y, i->name_.c_str(), TextStyle::mediumBlackOnWhite, 200, TextAlign::left);
+            g.printText(x, y, i->name_.c_str(), TextStyle::mediumBlackOnWhite, 200, TextAlign::left);
         } else {
-            screen.printText(x, y, i->name_.c_str(), TextStyle::mediumWhiteOnBlack, 200, TextAlign::left);
+            g.printText(x, y, i->name_.c_str(), TextStyle::mediumWhiteOnBlack, 200, TextAlign::left);
         }
         y += 30;
     }

@@ -2,24 +2,24 @@
 
 #include "../Debug.h"
 
-void OracModule::paint() {
-    clearBackground();
-    OComponent::paint();
+void OracModule::paint(Graphics& g) {
+    clearBackground(g);
+    OComponent::paint(g);
 
-    if (isActive()) drawBorder();
+    if (isActive()) drawBorder(g);
 
     auto rack = model_->getRack(rackId_);
     auto module = model_->getModule(rack, moduleId_);
     if (rack && module) {
-        screen.printText(10, 10, module->id().c_str(), TextStyle::smallWhiteOnBlack, width, TextAlign::left);
+        g.printText(10, 10, module->id().c_str(), TextStyle::smallWhiteOnBlack, width, TextAlign::left);
 
         if (module->displayName().length() < 6) {
             screen.printText(10, 50, module->displayName().c_str(), TextStyle::smallWhiteOnBlack, width, TextAlign::left);
         } else {
             std::string s1 = module->displayName().substr(0, 5);
             std::string s2 = module->displayName().substr(5);
-            screen.printText(10, 50, s1.c_str(), TextStyle::smallWhiteOnBlack, width, TextAlign::left);
-            screen.printText(10, 70, s2.c_str(), TextStyle::smallWhiteOnBlack, width, TextAlign::left);
+            g.printText(10, 50, s1.c_str(), TextStyle::smallWhiteOnBlack, width, TextAlign::left);
+            g.printText(10, 70, s2.c_str(), TextStyle::smallWhiteOnBlack, width, TextAlign::left);
         }
     }
 }

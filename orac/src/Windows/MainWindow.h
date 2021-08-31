@@ -19,7 +19,7 @@ public:
         doNotUseControlSets();
     }
 
-    void paint() override;
+    void paint(Graphics& g) override;
 
     void addRack(const Kontrol::Rack &r);
 

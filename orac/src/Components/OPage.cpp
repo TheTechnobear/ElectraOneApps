@@ -2,11 +2,11 @@
 
 #include "../Debug.h"
 
-void OracPage::paint() {
+void OracPage::paint(Graphics& g) {
 //        dbgMessage("paint page %s", (moduleId_+":"+pageId_).c_str());
-    clearBackground();
+    clearBackground(g);
 
-    OComponent::paint();
+    OComponent::paint(g);
 
     auto rack = model_->getRack(rackId_);
     auto module = model_->getModule(rack, moduleId_);
@@ -17,11 +17,11 @@ void OracPage::paint() {
     if (page) {
         auto &name = page->displayName();
 
-        screen.printText(1, 1, name.c_str(),
+        g.printText(1, 1, name.c_str(),
                          TextStyle::smallWhiteOnBlack, width - 2,
                          TextAlign::center);
         if (parent_->isActive() && isActive()) {
-            screen.drawLine(30, 18, width - 60, 18, COLOR_WHITE);
+            g.drawLine(30, 18, width - 60, 18, COLOR_WHITE);
         }
     }
 
