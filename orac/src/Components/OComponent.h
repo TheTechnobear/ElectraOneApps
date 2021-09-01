@@ -42,13 +42,6 @@ public:
         // }
     }
 
-    void onTouchUp(TouchEvent &touchEvent) override {
-        if (onClick) {
-            onClick();
-        }
-    }
-
-
     void assignToWindow(Window *window) override {
         Component::assignToWindow(window);
         for (auto &c : children_) {
@@ -56,7 +49,7 @@ public:
         }
     }
 
-    void paint(Graphics& g) override {
+    void paint(Graphics &g) override {
         if (parent_ && !parent_->isVisible()) return;
 
         if (isVisible()) {
@@ -104,17 +97,51 @@ public:
     // -------------------
     void add(const std::shared_ptr<OComponent> &c) { children_.push_back(c); }
 
-    void clearBackground(Graphics& g) {
+    void clearBackground(Graphics &g) {
         g.fillRect(0, 0, width, height, bgClr_);
     }
 
-    void drawBorder(Graphics& g) {
+    void drawBorder(Graphics &g) {
         g.drawRect(0, 0, width, height, fgClr_);
     }
 
     void setFgColour(uint16_t clr) { fgClr_ = clr; }
 
     void setBgColour(uint16_t clr) { bgClr_ = clr; }
+
+    void onTouchUp(const TouchEvent &touchEvent) override {
+        TouchListener::onTouchUp(touchEvent);
+        if (parent_) parent_->onTouchUp(touchEvent);
+    }
+
+    void onTouchDown(const TouchEvent &touchEvent) override {
+        TouchListener::onTouchDown(touchEvent);
+        if (parent_) parent_->onTouchDown(touchEvent);
+    }
+
+    void onTouchClick(const TouchEvent &touchEvent) override {
+        TouchListener::onTouchClick(touchEvent);
+        if (onClick) {
+            onClick();
+        } else {
+            if (parent_) parent_->onTouchClick(touchEvent);
+        }
+    }
+
+    void onTouchDoubleClick(const TouchEvent &touchEvent) override {
+        TouchListener::onTouchDoubleClick(touchEvent);
+        if (parent_) parent_->onTouchDoubleClick(touchEvent);
+    }
+
+    void onTouchMove(const TouchEvent &touchEvent) override {
+        TouchListener::onTouchMove(touchEvent);
+        if (parent_) parent_->onTouchMove(touchEvent);
+    }
+
+    void onTouchLongHold(const TouchEvent &touchEvent) override {
+        TouchListener::onTouchLongHold(touchEvent);
+        if (parent_) parent_->onTouchLongHold(touchEvent);
+    }
 
 protected:
     uint16_t bgClr_ = 0x0000;

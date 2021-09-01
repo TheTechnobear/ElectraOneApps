@@ -70,8 +70,8 @@ DebugWindow::DebugWindow(uint16_t newX, uint16_t newY, uint16_t newWidth, uint16
     doNotUseControlSets();
 }
 
-void DebugWindow::paint(Graphics& g) {
-    g.fillRect(screenX, screenY, width, height, COLOR_BLACK);
+void DebugWindow::paint(Graphics &g) {
+    g.fillRect(0, 0, width, height, COLOR_BLACK);
     Window::paint(g);
     static const unsigned th = 20;
     static const unsigned nMsgDisp = (height - 50) / th;
@@ -79,14 +79,14 @@ void DebugWindow::paint(Graphics& g) {
     for (unsigned i = 0; i < nMsgDisp; i++) {
         unsigned idx = (sidx + i) % dbgRingBuffer::MAX_MSGS;
         const char *msg = dbgBuf_.buffer_[idx];
-        g.printText(screenX + 10, screenY + 10 + (i * th), msg,
-                         TextStyle::smallWhiteOnBlack, width,
-                         TextAlign::left);
+        g.printText(10, 10 + (i * th), msg,
+                    TextStyle::smallWhiteOnBlack, width,
+                    TextAlign::left);
     }
 }
 
 void DebugWindow::buttonUp(uint8_t buttonId) {
-    if(isButtonHandled(buttonId) || !isVisible()) return;
+    if (isButtonHandled(buttonId) || !isVisible()) return;
     OWindow::buttonUp(buttonId);
 
     switch (buttonId) {
@@ -109,7 +109,6 @@ void DebugWindow::buttonUp(uint8_t buttonId) {
         }
     }
 }
-
 
 
 void dbgMessage(const char *format, ...) {

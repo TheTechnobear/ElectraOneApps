@@ -11,8 +11,11 @@
 
 
 class MainWindow;
+
 class ModuleWindow;
+
 class PresetWindow;
+
 struct MenuItem;
 
 #include "Windows/AppWindows.h"
@@ -35,7 +38,7 @@ public:
 
     void touchDown(TouchEvent &touchEvent) override;
     void touchUp(TouchEvent &touchEvent) override;
-    void touchHold(TouchEvent &touchEvent) override;
+    void touchMove(TouchEvent &touchEvent) override;
     void touchLongHold(TouchEvent &touchEvent) override;
     void touchClick(TouchEvent &touchEvent) override;
     void touchDoubleClick(TouchEvent &touchEvent) override;
@@ -52,6 +55,7 @@ public:
     void runUserTask() override;
 
     Windows *getWindows() override { return (&windows_); }
+
     AppWindows *getAppWindows() { return (&windows_); }
 
     MidiBase *getMidi() override;
@@ -116,5 +120,5 @@ private:
     std::shared_ptr<MenuItem> presetMenuItems_;
     MidiBase midi_;
 
-    OWindow* buttonDownWin_[NR_OF_HW_BUTTONS] = {nullptr, nullptr, nullptr, nullptr, nullptr, nullptr};
+    OWindow *buttonDownWin_[NR_OF_HW_BUTTONS] = {nullptr, nullptr, nullptr, nullptr, nullptr, nullptr};
 };

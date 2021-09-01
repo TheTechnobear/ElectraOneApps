@@ -26,13 +26,13 @@ public:
 
     void touchUp(TouchEvent &touchEvent) override {
         if (auto c = touchEvent.getEventComponent()) {
-            c->onTouchHold(touchEvent);
+            c->onTouchUp(touchEvent);
         }
     }
 
-    void touchHold(TouchEvent &touchEvent) override {
+    void touchMove(TouchEvent &touchEvent) override {
         if (auto c = touchEvent.getEventComponent()) {
-            c->onTouchUp(touchEvent);
+            c->onTouchMove(touchEvent);
         }
     }
 

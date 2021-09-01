@@ -95,9 +95,16 @@ public:
         repaint();
     }
 
+    void onTouchDown(const TouchEvent &touchEvent) override;
+    void onTouchMove(const TouchEvent &touchEvent) override;
+    void onTouchUp(const TouchEvent &touchEvent) override;
 
 private:
     Kontrol::EntityId rackId_;
+
+    // only currently handling one touch!
+    std::unique_ptr<TouchEvent> lastTouch_;
+    std::unique_ptr<TouchEvent> beginTouch_;
 
     static constexpr unsigned MAX_DISPLAY = 3;
     unsigned displayOffset_ = 0, displayIdx_ = 0;

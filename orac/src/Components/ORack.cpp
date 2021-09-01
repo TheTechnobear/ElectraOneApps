@@ -1,6 +1,7 @@
 #include "ORack.h"
 
 #include "../Debug.h"
+#include <memory>
 
 void OracRack::addModule(const Kontrol::Rack &r, const Kontrol::Module &m) {
     if (r.id() != rackId_) { dbgMessage("ASSERT OracRack::addModule"); }
@@ -33,7 +34,7 @@ void OracRack::addModule(const Kontrol::Rack &r, const Kontrol::Module &m) {
     }
 }
 
-void OracRack::paint(Graphics& g) {
+void OracRack::paint(Graphics &g) {
     clearBackground(g);
 //    drawBorder();
     OComponent::paint(g);
@@ -95,5 +96,67 @@ void OracRack::onPotChange(int16_t relativeChange, handle_t handle) {
             auto module = modules_[id];
             module->onPotChange(relativeChange, handle);
         }
+    }
+}
+
+void OracRack::onTouchDown(const TouchEvent &touchEvent) {
+    TouchListener::onTouchDown(touchEvent);
+    if (!beginTouch_) {
+        beginTouch_ = std::unique_ptr<TouchEvent>(new TouchEvent(touchEvent));
+        lastTouch_ = std::unique_ptr<TouchEvent>(new TouchEvent(touchEvent));
+    }
+}
+
+void OracRack::onTouchMove(const TouchEvent &touchEvent) {
+    TouchListener::onTouchMove(touchEvent);
+    if (beginTouch_ && touchEvent.getId() == beginTouch_->getId()) {
+        auto travelX = touchEvent.getScreenX() - lastTouch_->getScreenX();
+        auto travelY = touchEvent.getScreenY() - lastTouch_->getScreenY();
+        if (travelY > 20) {
+            nextDisplay();
+        } else if (travelY < -20) {
+            prevDisplay();
+        }
+
+        if (travelX > 20) {
+            getActiveModule()->prevDisplay();
+        } else if (travelX < -20) {
+            getActiveModule()->nextDisplay();
+        }
+
+        lastTouch_ = std::unique_ptr<TouchEvent>(new TouchEvent(touchEvent));
+    }
+}
+
+void OracRack::onTouchUp(const TouchEvent &touchEvent) {
+    OComponent::onTouchUp(touchEvent);
+    if (beginTouch_ && touchEvent.getId() == beginTouch_->getId()) {
+        auto travelX = touchEvent.getScreenX() - lastTouch_->getScreenX();
+        auto travelY = touchEvent.getScreenY() - lastTouch_->getScreenY();
+
+        if (travelY > 20) {
+            nextDisplay();
+        } else if (travelY < -20) {
+            prevDisplay();
+        }
+
+        unsigned h = ((height - 4) / MAX_DISPLAY) - 4;
+        auto posY = touchEvent.getScreenY() - screenY - 4;
+        int curYIdx = displayIdx_ - displayOffset_;
+        unsigned idxY = posY / h;
+        unsigned newIdx = displayIdx_ + (idxY - curYIdx);
+        if (newIdx >= 0 && newIdx < displayOrder_.size()) {
+            displayIdx_ = displayIdx_ + (idxY - curYIdx);
+            scrollView();
+        }
+
+        if (travelX > 20) {
+            getActiveModule()->prevDisplay();
+        } else if (travelX < -20) {
+            getActiveModule()->nextDisplay();
+        }
+
+        beginTouch_ = nullptr;
+        lastTouch_ = nullptr;
     }
 }

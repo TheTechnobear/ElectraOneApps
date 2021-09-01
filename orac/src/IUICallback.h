@@ -5,7 +5,7 @@ class IUICallback {
 public:
     virtual void touchDown(TouchEvent &touchEvent) = 0;
     virtual void touchUp(TouchEvent &touchEvent) = 0;
-    virtual void touchHold(TouchEvent &touchEvent) = 0;
+    virtual void touchMove(TouchEvent &touchEvent) = 0;
     virtual void touchLongHold(TouchEvent &touchEvent) = 0;
     virtual void touchClick(TouchEvent &touchEvent) = 0;
     virtual void touchDoubleClick(TouchEvent &touchEvent) = 0;

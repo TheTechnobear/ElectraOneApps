@@ -88,8 +88,8 @@ void ElectraApp::touchDown(TouchEvent &touchEvent) {
     if (auto w = currentWindow()) w->touchDown(touchEvent);
 }
 
-void ElectraApp::touchHold(TouchEvent &touchEvent) {
-    if (auto w = currentWindow()) w->touchHold(touchEvent);
+void ElectraApp::touchMove(TouchEvent &touchEvent) {
+    if (auto w = currentWindow()) w->touchMove(touchEvent);
 }
 
 void ElectraApp::touchUp(TouchEvent &touchEvent) {
