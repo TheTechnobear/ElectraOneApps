@@ -67,22 +67,24 @@ void MainWindow::buttonUp(uint8_t buttonId) {
     if (isButtonHandled(buttonId) || !isVisible()) return;
     OWindow::buttonUp(buttonId);
 
-    if(sleepMode_ && buttonId!=BUTTON_RIGHT_BOTTOM) {
+    if (sleepMode_ && buttonId != BUTTON_RIGHT_BOTTOM) {
         return;
     }
 
     switch (buttonId) {
         case BUTTON_LEFT_TOP : {
+            getActiveRack()->prevDisplay();
             break;
         }
         case BUTTON_LEFT_MIDDLE : {
+            getActiveRack()->nextDisplay();
             break;
         }
         case BUTTON_LEFT_BOTTOM: {
             if (buttonLongHold_[BUTTON_RIGHT_BOTTOM]) {
                 // standby mode
                 buttonHandled(BUTTON_RIGHT_BOTTOM);
-                buttonLongHold_[BUTTON_RIGHT_BOTTOM]=false;
+                buttonLongHold_[BUTTON_RIGHT_BOTTOM] = false;
                 enableSleepMode();
             } else {
                 nextMode();
@@ -104,10 +106,9 @@ void MainWindow::buttonUp(uint8_t buttonId) {
         }
         case BUTTON_RIGHT_BOTTOM: {
             if (buttonLongHold_[buttonId]) {
-                if(sleepMode_) {
+                if (sleepMode_) {
                     disableSleepMode();
-                }
-                else {
+                } else {
                     auto eapp = static_cast<ElectraApp *>(app);
                     eapp->getAppWindows()->select(AppWindows::DEBUG);
                 }
@@ -142,8 +143,16 @@ void MainWindow::addRack(const Kontrol::Rack &r) {
     }
 }
 
+void MainWindow::clearRacks() {
+    // CRASHING !!!
+    // try when we have new hierarchy
+//    removeAllChildren();
+//    racks_.clear();
+//    repaint();
+}
 
-void MainWindow::paint(Graphics& g) {
+
+void MainWindow::paint(Graphics &g) {
     g.fillRect(screenX, screenY, width, height, COLOR_BLACK);
     Window::paint(g);
 
@@ -206,12 +215,12 @@ void MainWindow::enableSleepMode() {
         delay(10);
     }
     screen.setBacklightbrightness(65535);
-    sleepMode_=true;
+    sleepMode_ = true;
 }
 
 void MainWindow::disableSleepMode() {
     logMessage("hardwareButtonLambda: switch LCD on");
-    sleepMode_=false;
+    sleepMode_ = false;
     repaint();
 
     delay(50);

@@ -98,8 +98,13 @@ public:
         }
     }
 
-    void deleteRack(Kontrol::ChangeSource, const Kontrol::Rack &) override {
-        // not using but pure virtual
+    void deleteRack(Kontrol::ChangeSource src, const Kontrol::Rack &) override {
+        if (src == Kontrol::CS_LOCAL) {
+        } else {
+            dbgMessage("clear racks, and restart");
+//            app_->mainWindow()->clearRacks();
+            app_->getAppWindows()->select(AppWindows::DEBUG);
+        }
     }
 
     void resource(Kontrol::ChangeSource src, const Kontrol::Rack &,
@@ -207,6 +212,16 @@ public:
         } else {
             app_->modulationLearn(b);
         }
+    }
+
+    void ping(Kontrol::ChangeSource src,
+              const std::string &host, unsigned port,
+              unsigned keepAlive) override {
+        auto &sysex = sysExOutStream_;
+        sysex.begin();
+        sysex.addHeader(E1_PING_MSG);
+        sysex.end();
+        send(sysex);
     }
 
 /*

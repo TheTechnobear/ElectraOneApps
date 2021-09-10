@@ -9,7 +9,6 @@
 
 #include "Components/TextComponent.h"
 
-
 class MainWindow;
 
 class ModuleWindow;
@@ -110,6 +109,7 @@ private:
 
     bool midiLearnActive_ = false;
     bool modulationLearnActive_ = false;
+    bool initialLoad_=false;
 
     std::shared_ptr<MainWindow> mainWindow_;
     std::shared_ptr<ModuleWindow> moduleWindow_;

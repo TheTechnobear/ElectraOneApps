@@ -113,9 +113,9 @@ void OracRack::onTouchMove(const TouchEvent &touchEvent) {
         auto travelX = touchEvent.getScreenX() - lastTouch_->getScreenX();
         auto travelY = touchEvent.getScreenY() - lastTouch_->getScreenY();
         if (travelY > 20) {
-            nextDisplay();
-        } else if (travelY < -20) {
             prevDisplay();
+        } else if (travelY < -20) {
+            nextDisplay();
         }
 
         if (travelX > 20) {
@@ -135,9 +135,9 @@ void OracRack::onTouchUp(const TouchEvent &touchEvent) {
         auto travelY = touchEvent.getScreenY() - lastTouch_->getScreenY();
 
         if (travelY > 20) {
-            nextDisplay();
-        } else if (travelY < -20) {
             prevDisplay();
+        } else if (travelY < -20) {
+            nextDisplay();
         }
 
         unsigned h = ((height - 4) / MAX_DISPLAY) - 4;

@@ -22,6 +22,7 @@ public:
     void paint(Graphics& g) override;
 
     void addRack(const Kontrol::Rack &r);
+    void clearRacks();
 
     std::shared_ptr<OracRack> getActiveRack() {
         if (!racks_.empty()) {

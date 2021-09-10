@@ -13,6 +13,7 @@
 ElectraApp electraApp;
 
 ElectraApp::ElectraApp() {
+    initialLoad_ = false;
     mainWindow_ = std::make_shared<MainWindow>();
     moduleWindow_ = std::make_shared<ModuleWindow>();
     presetWindow_ = std::make_shared<PresetWindow>();
@@ -222,9 +223,16 @@ bool ElectraApp::handleE1SysEx(Kontrol::ChangeSource src,
         }
         case E1_START_PUB: {
             tokenToString_.clear();
+//            auto curRack = model->getLocalRack();
+//            if (curRack != nullptr) {
+//                model->deleteRack(src, curRack->id());
+//            }
+            initialLoad_ = true;
             unsigned numRacks = sysex.readUnsigned();
             // logMessage("E1_START_PUB %d", numRacks);
             model->publishStart(src, numRacks);
+            // send a ping, so mec knows we are alive
+            model->ping(src, "E1", 0, 0);
             break;
         }
         case E1_RACK_END: {
@@ -366,6 +374,13 @@ bool ElectraApp::handleE1SysEx(Kontrol::ChangeSource src,
         case E1_MOD_LEARN_MSG : {
             bool b = sysex.readUnsigned() > 0;
             model->modulationLearn(src, b);
+            break;
+        }
+        case E1_PING_MSG : {
+            if (initialLoad_) {
+                // dont return pings until first message is recvd!
+                model->ping(src, "E1", 0, 0);
+            }
             break;
         }
         case E1_SYSEX_MAX:
