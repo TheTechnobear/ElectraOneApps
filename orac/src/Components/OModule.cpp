@@ -45,10 +45,8 @@ void OracModule::addPage(const Kontrol::Rack &r, const Kontrol::Module &m, const
     if (m.id() != moduleId_) { dbgMessage("ASSERT OracModule::addPage - invalid module"); }
 
     static uint16_t clrs_[MAX_DISPLAY] = {ElectraColours::getNumericRgb565(ElectraColours::red),
-                                          ElectraColours::getNumericRgb565(ElectraColours::orange),
-                                          ElectraColours::getNumericRgb565(ElectraColours::blue)};
-    // uint16_t clrs_[3] = {rgbToRgb565(0xF, 0x0, 0x0), gbToRgb565(0x0, 0xF, 0x0),
-    //                      rgbToRgb565(0x0, 0x0, 0xF)};
+                                          ElectraColours::getNumericRgb565Darker(ElectraColours::green),
+                                          ElectraColours::getNumericRgb565Darker(ElectraColours::purple)};
 
     if (pages_.count(p.id()) == 0) {
 //            dbgMessage("addPage %s %s", moduleId_.c_str(), p.id().c_str());

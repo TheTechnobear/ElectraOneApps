@@ -104,6 +104,16 @@ void OracRack::onTouchDown(const TouchEvent &touchEvent) {
     if (!beginTouch_) {
         beginTouch_ = std::unique_ptr<TouchEvent>(new TouchEvent(touchEvent));
         lastTouch_ = std::unique_ptr<TouchEvent>(new TouchEvent(touchEvent));
+
+        unsigned h = ((height - 4) / MAX_DISPLAY) - 4;
+        auto posY = touchEvent.getScreenY() - screenY - 4;
+        int curYIdx = displayIdx_ - displayOffset_;
+        unsigned idxY = posY / h;
+        unsigned newIdx = displayIdx_ + (idxY - curYIdx);
+        if (newIdx >= 0 && newIdx < displayOrder_.size()) {
+            displayIdx_ = displayIdx_ + (idxY - curYIdx);
+            scrollView();
+        }
     }
 }
 
@@ -131,31 +141,6 @@ void OracRack::onTouchMove(const TouchEvent &touchEvent) {
 void OracRack::onTouchUp(const TouchEvent &touchEvent) {
     OComponent::onTouchUp(touchEvent);
     if (beginTouch_ && touchEvent.getId() == beginTouch_->getId()) {
-        auto travelX = touchEvent.getScreenX() - lastTouch_->getScreenX();
-        auto travelY = touchEvent.getScreenY() - lastTouch_->getScreenY();
-
-        if (travelY > 20) {
-            prevDisplay();
-        } else if (travelY < -20) {
-            nextDisplay();
-        }
-
-        unsigned h = ((height - 4) / MAX_DISPLAY) - 4;
-        auto posY = touchEvent.getScreenY() - screenY - 4;
-        int curYIdx = displayIdx_ - displayOffset_;
-        unsigned idxY = posY / h;
-        unsigned newIdx = displayIdx_ + (idxY - curYIdx);
-        if (newIdx >= 0 && newIdx < displayOrder_.size()) {
-            displayIdx_ = displayIdx_ + (idxY - curYIdx);
-            scrollView();
-        }
-
-        if (travelX > 20) {
-            getActiveModule()->prevDisplay();
-        } else if (travelX < -20) {
-            getActiveModule()->nextDisplay();
-        }
-
         beginTouch_ = nullptr;
         lastTouch_ = nullptr;
     }
